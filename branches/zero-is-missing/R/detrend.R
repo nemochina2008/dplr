@@ -1,7 +1,7 @@
 `detrend` <-
     function(rwl, y.name = names(rwl), make.plot = FALSE,
              method=c("Spline", "ModNegExp", "Mean"),
-             nyrs = NULL, f = 0.5, pos.slope = FALSE)
+             nyrs = NULL, f = 0.5, pos.slope = FALSE, ...)
 {
     known.methods <- c("Spline", "ModNegExp", "Mean")
     method2 <- match.arg(arg = method,
@@ -27,7 +27,7 @@
         out <- foreach(rwl.i=it.rwl, .packages="dplR") %dopar% {
             fits <- detrend.series(rwl.i, make.plot=FALSE,
                                    method=method2, nyrs=nyrs, f=f,
-                                   pos.slope=pos.slope)
+                                   pos.slope=pos.slope, ...)
             if(is.data.frame(fits))
                 row.names(fits) <- rn
             fits
@@ -38,7 +38,7 @@
             fits <- detrend.series(rwl[[i]], y.name=y.name[i],
                                    make.plot=make.plot,
                                    method=method2, nyrs=nyrs, f=f,
-                                   pos.slope=pos.slope)
+                                   pos.slope=pos.slope, ...)
             if(is.data.frame(fits))
                 row.names(fits) <- rn
             out[[i]] <- fits
