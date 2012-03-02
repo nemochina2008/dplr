@@ -13,6 +13,7 @@
     rn <- row.names(rwl)
 
     args <- list(...)
+    args[["method"]] <- method2
     if (!make.plot &&
         ("Spline" %in% method2 || "ModNegExp" %in% method2) &&
         !inherits(try(suppressWarnings(req.it <-
