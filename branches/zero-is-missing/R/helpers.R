@@ -8,11 +8,9 @@ check.flags <- function(...) {
     if (any(flag.bad)) {
         offending <- vapply(match.call(expand.dots=TRUE)[c(FALSE, flag.bad)],
                             deparse, "")
-        stop(sprintf(ngettext(length(offending),
-                              "must be TRUE or FALSE but is not: %s",
-                              "must be TRUE or FALSE but are not: %s",
-                              domain="R-dplR"),
-                     paste(sQuote(offending), collapse=", ")),
+        stop(gettextf("must be TRUE or FALSE: %s",
+                      paste(sQuote(offending), collapse=", "),
+                      domain="R-dplR"),
              domain = NA)
     }
 }
