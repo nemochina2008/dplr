@@ -1,7 +1,8 @@
 ## Power transform raw ring-width series after Cook & Peters 1997
 powt <- function(rwl) {
-    if (!is.data.frame(rwl))
+    if (!is.data.frame(rwl)) {
         stop("'rwl' must be a data.frame")
+    }
     ## Get maximum precision of rwl data from number of digits.
     ## Assumes non-negative numbers.
     getprec <- function(rwl) {

@@ -3,49 +3,54 @@
     ## Open the data file for reading
     con <- file(fname, encoding = encoding)
     on.exit(close(con))
-    if(is.null(header)){
+    if (is.null(header)) {
         ## Try to determine if the file has a header. This is failable.
         ## Find out if an ITRDB header (3 lines) in file
         hdr1 <- readLines(con, n=1)
-        if(length(hdr1) == 0)
+        if (length(hdr1) == 0) {
             stop("file is empty")
-        if(nchar(hdr1) < 10)
+        }
+        if (nchar(hdr1) < 10) {
             stop("first line in the crn file ends before col 10")
+        }
         yrcheck <- suppressWarnings(as.numeric(substr(hdr1, 7, 10)))
-        if(is.null(yrcheck) || length(yrcheck)!=1 || is.na(yrcheck) |
-           yrcheck < -1e04 || yrcheck > 1e04) {
+        if (is.null(yrcheck) || length(yrcheck)!=1 || is.na(yrcheck) |
+            yrcheck < -1e04 || yrcheck > 1e04) {
             cat(gettext("There appears to be a header in the crn file\n",
                         domain="R-dplR"))
             is.head <- TRUE
-        }
-        else {
+        } else {
             cat(gettext("There does not appear to be a header in the crn file\n",
                         domain="R-dplR"))
             is.head <- FALSE # No header lines
         }
-    } else if(!is.logical(header)){
+    } else if (!is.logical(header)) {
         stop("'header' must be NULL or logical")
-    } else{
+    } else {
         is.head <- header
     }
-    if(is.head){
+    if (is.head) {
         ## Read 4th line - should be first data line
         dat1 <- readLines(con, n=4)
-        if(length(dat1) < 4)
+        if (length(dat1) < 4) {
             stop("file has under 4 lines")
+        }
         dat1 <- dat1[4]
-    } else{
+    } else {
         dat1 <- readLines(con, n=1)
-        if(length(dat1) == 0)
+        if (length(dat1) == 0) {
             stop("file is empty")
+        }
     }
-    if(nchar(dat1) < 10)
+    if (nchar(dat1) < 10) {
         stop("first data line ends before col 10")
+    }
     yrcheck <- as.numeric(substr(dat1, 7, 10))
-    if(is.null(yrcheck) || length(yrcheck)!=1 || is.na(yrcheck) ||
-       yrcheck < -1e04 || yrcheck > 1e04)
+    if (is.null(yrcheck) || length(yrcheck)!=1 || is.na(yrcheck) ||
+        yrcheck < -1e04 || yrcheck > 1e04) {
         stop(gettextf("cols %d-%d of first data line not a year", 7, 10,
                       domain="R-dplR"))
+    }
     ## Look at last line to determine if Chronology Statistics are present
     ## if nchar <=63 then there is a stats line
     nlines <- length(readLines(con, n=-1))
@@ -61,8 +66,8 @@
     con <- file(fname, encoding = encoding)
     ## If columns 3 in chron.stats is an integer then there is no
     ## statistics line
-    if(is.numeric(chron.stats[[3]]) &&
-       !is.int(as.numeric(chron.stats[[3]]))){
+    if (is.numeric(chron.stats[[3]]) &&
+        !is.int(as.numeric(chron.stats[[3]]))) {
         names(chron.stats) <-
             c("SiteID", "nYears", "AC[1]", "StdDev", "MeanSens",
               "MeanRWI", "IndicesSum", "IndicesSS", "MaxSeries")
@@ -102,13 +107,13 @@
     x <- as.matrix(dat[seq(from=3, to=21, by=2)])
     ## All sample depths
     y <- as.matrix(dat[seq(from=4, to=22, by=2)])
-    for(i in seq_len(nseries)){
+    for (i in seq_len(nseries)) {
         idx <- which(series.index == i)
-        for(j in idx) {
+        for (j in idx) {
             yr <- (decade.yr[j] %/% 10) * 10
             row.seq <- seq(from = yr - min.year + 1, by = 1, length.out = 10)
             crn.mat[row.seq, i] <- x[j, ]
-            if(i == 1) {
+            if (i == 1) {
                 crn.mat[row.seq, ncol.crn.mat] <- y[j, ]
             }
         }
@@ -121,7 +126,7 @@
                 drop=FALSE]
     ## If samp depth is all 1 then dump it
     sd.one <- all(crn.mat[, ncol.crn.mat] == 1)
-    if(sd.one) {
+    if (sd.one) {
         save.names <- colnames(crn.mat)[-ncol.crn.mat]
         crn.mat <- crn.mat[, -ncol.crn.mat, drop=FALSE]
         crn.mat <- crn.mat / 1000
@@ -129,8 +134,7 @@
         names(crn.df) <- save.names
         cat(gettext("All embedded sample depths are one...Dumping from matrix\n",
                     domain="R-dplR"))
-    }
-    else {
+    } else {
         seq.series <- seq_len(nseries)
         crn.mat[, seq.series] <- crn.mat[, seq.series] / 1000
         crn.df <- as.data.frame(crn.mat)

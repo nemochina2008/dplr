@@ -7,25 +7,25 @@ read.rwl <-
            auto = {
                f <- file(fname,"r")
                l1 <- readLines(f, n=1)
-               if(length(l1) == 0){
+               if (length(l1) == 0) {
                    close(f)
                    stop("file is empty")
                }
                ## A rough test for a compact format file
-               if(grepl("[1-9][0-9]*\\([1-9][0-9]*F[1-9][0-9]*\\.0\\)~ *$",
-                        l1)){
+               if (grepl("[1-9][0-9]*\\([1-9][0-9]*F[1-9][0-9]*\\.0\\)~ *$",
+                         l1)) {
                    cat(gettext("Detected a DPL compact format file.\n",
                                domain="R-dplR"))
                    close(f)
                    read.compact(fname, ...)
-               } else if(grepl("^HEADER:$", l1)){ # Heidelberg test
+               } else if (grepl("^HEADER:$", l1)) { # Heidelberg test
                    cat(gettext("Detected a Heidelberg format file.\n",
                                domain="R-dplR"))
                    close(f)
                    read.fh(fname, ...)
                } else {
                    ## A rough test for a TRiDaS file
-                   if(grepl("<tridas>", l1)){
+                   if (grepl("<tridas>", l1)) {
                        cat(gettext("Detected a TRiDaS file.\n",
                                    domain="R-dplR"))
                        close(f)
@@ -38,7 +38,7 @@ read.rwl <-
                        ## lines, and try to detect <tridas> in those.
                        more.lines <- readLines(f, n=20)
                        close(f)
-                       if(any(grepl("<tridas>", more.lines))){
+                       if (any(grepl("<tridas>", more.lines))) {
                            cat(gettext("Detected a TRiDaS file.\n",
                                        domain="R-dplR"))
                            read.tridas(fname, ...)

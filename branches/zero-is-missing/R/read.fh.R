@@ -6,7 +6,7 @@ read.fh <- function(fname) {
     ## get keycodes (= series ids)
     keycodes <- gsub("KeyCode=(.*)", "\\1", inp[grep("^KeyCode=", inp)])
     n <- length(keycodes)
-    if(n == 0) {
+    if (n == 0) {
         stop("file is empty")
     }
     ## get start years from meta data

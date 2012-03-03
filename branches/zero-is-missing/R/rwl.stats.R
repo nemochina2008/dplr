@@ -1,11 +1,11 @@
 `rwl.stats` <-
     function(rwl)
 {
-    acf1 <- function(x){
+    acf1 <- function(x) {
         ar1 <- acf(x[!is.na(x)], lag.max=1, plot=FALSE)
         ar1$acf[2]
     }
-    skew <- function(x){
+    skew <- function(x) {
         y <- x[!is.na(x)]
         sum((y-mean(y))^3) / (length(y)*sd(y)^3)
     }

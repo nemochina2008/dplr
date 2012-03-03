@@ -1,10 +1,12 @@
 sea <- function(x, key, lag = 5, resample = 1000) {
-    if(!is.data.frame(x))
+    if (!is.data.frame(x)) {
         stop("'x' must be a data.frame")
-    if (dim(x)[2] > 1)                  # remove samp.depth if present
+    }
+    if (dim(x)[2] > 1) {                # remove samp.depth if present
         x.unscaled <- x[1]
-    else
+    } else {
         x.unscaled <- x
+    }
     x.scaled <- data.frame(scale(x.unscaled))
     n <- length(key)
     m <- 2 * lag + 1
