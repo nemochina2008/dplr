@@ -8,7 +8,7 @@
     method2 <- match.arg(arg = method,
                          choices = known.methods,
                          several.ok = TRUE)
-    stopifnot(is.logical(zero.is.missing), length(zero.is.missing) == 1)
+    check.flags(zero.is.missing, pos.slope, make.plot)
     ## Remove NA from the data (they will be reinserted later)
     good.y <- which(!is.na(y))
     n.good <- length(good.y)

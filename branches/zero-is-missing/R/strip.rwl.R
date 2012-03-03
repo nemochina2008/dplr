@@ -23,6 +23,7 @@ strip.rwl <- function(rwl, ids = NULL, verbose = FALSE, comp.plot = FALSE,
         any(is.na(names.rwl))) {
         stop("'rwl' must have unique, non-NA names")
     }
+    check.flags(legacy.eps, comp.plot, verbose)
 
     ids2 <- ids
     if (!is.null(ids)) {

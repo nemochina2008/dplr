@@ -156,6 +156,9 @@ read.tridas <- function(fname, ids.from.titles=FALSE,
                         ids.from.identifiers=TRUE, combine.series=TRUE,
                         trim.whitespace=TRUE, warn.units=TRUE) {
 
+    check.flags(warn.units, trim.whitespace, combine.series,
+                ids.from.identifiers, ids.from.titles)
+
     ## Returns a list of handler functions usable by xmlEventParse
     handler.factory <- function() {
         ## Multipliers and divisors for converting values to millimetres,

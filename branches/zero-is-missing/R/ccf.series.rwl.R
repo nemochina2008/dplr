@@ -10,6 +10,7 @@ ccf.series.rwl <- function(rwl, series,
     if (lag.max > seg.length) {
         stop("'lag.max' > 'seg.length'")
     }
+    check.flags(floor.plus1, make.plot, biweight, prewhiten)
     seg.lag <- seg.length / 2
 
     ## Normalize.

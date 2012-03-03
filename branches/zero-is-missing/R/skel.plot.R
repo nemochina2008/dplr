@@ -1,20 +1,28 @@
 `skel.plot` <-
     function(rw.vec, yr.vec = NULL, sname = "", filt.weight = 9,
-             dat.out = FALSE, master=FALSE, plot=TRUE)
+             dat.out = FALSE, master=FALSE, plot=TRUE, zero.is.missing=TRUE,
+             metadata.out = FALSE)
 {
-    if(nchar(sname) > 7)
+    if (nchar(sname) > 7) {
         stop("'sname' must be a character string less than 8 characters long")
+    }
+    check.flags(zero.is.missing, plot, master, dat.out)
 
-    ## what about NA. Internal NA?
     na.mask <- is.na(rw.vec)
-    rw.vec2 <- rw.vec[!na.mask]
+    notna.idx <- which(!na.mask)
+    n.notna <- length(notna.idx)
+    if (n.notna > 0) {
+        rw.vec2 <- rw.vec[notna.idx[1]:notna.idx[n.notna]]
+    } else {
+        rw.vec2 <- numeric(0)
+    }
 
     n.val <- length(rw.vec2)
-    if(n.val > 840) {
+    if (n.val > 840) {
         cat(gettextf("input series has length of %d\n", n.val))
         stop("long series (> 840) must be split into multiple plots")
     }
-    if(n.val < filt.weight) {
+    if (n.val < filt.weight) {
         cat(gettextf("input series has length of %d", n.val),
             gettextf("'filt.weight' is %f\n", filt.weight), sep=", ")
         stop("'filt.weight' must not be larger than length of input series")
@@ -24,45 +32,57 @@
     ## dates and skel
 
     ## if no yr then....
-    if(is.null(yr.vec))
+    if (is.null(yr.vec)) {
         yr.vec2 <- 0:(n.val - 1)
-    else
-        yr.vec2 <- yr.vec[!na.mask]
-    ## pad down to the nearest 10 if not already there
-    pad0 <- floor(min(yr.vec2) / 10) * 10
-    if(pad0 != min(yr.vec2)){
-        pad.length <- min(yr.vec2) - pad0
-        rw.df <- data.frame(rw = rep(NA, pad.length),
-                            yr = pad0:(pad0 + pad.length - 1))
-        rw.df <- rbind(rw.df, data.frame(rw = rw.vec2, yr = yr.vec2))
+    } else {
+        yr.vec2 <- yr.vec[notna.idx[1]:notna.idx[n.notna]]
     }
-    else {
+    if (zero.is.missing) {
+        ## Convert internal NAs (0) to real NAs.
+        ## The NAs will propagate, also affecting the surrounding years.
+        zero.flag <- rw.vec2 == 0
+        rw.vec2[zero.flag] <- NA
+    }
+    original.na <- is.na(rw.vec2)       # NOTE! HUOM! metadata
+    ## pad down to the nearest 10 if not already there
+    min.yr <- min(yr.vec2)
+    pad0 <- floor(min.yr / 10) * 10
+    if (pad0 != min.yr) {
+        pad.length <- min.yr - pad0
+        rw.vec2 <- c(rep(NA_real_, pad.length), rw.vec2)
+        yr.vec2 <- c(seq(from=pad0, by=1, length.out=pad.length), yr.vec2)
+    } else {
         pad.length <- 0
-        rw.df <- data.frame(rw = rw.vec2, yr = yr.vec2)
     }
 
     ## detrend and pad
-    rw.dt <- hanning(rw.df$rw, filt.weight)
-    skel <- rep(NA, length(rw.df$rw))
+    rw.dt <- hanning(rw.vec2, filt.weight)
+    skel <- rep(NA, length(rw.vec2))
     ## calc rel growth
-    n.diff <- length(rw.df$rw) - 1
+    n.diff <- length(rw.vec2) - 1
     idx <- 2:n.diff
-    temp.diff <- diff(rw.df$rw)
+    temp.diff <- diff(rw.vec2)
     skel[idx] <- rowMeans(cbind(temp.diff[-n.diff],
-                                -temp.diff[-1])) / rw.dt[idx]
+                                -temp.diff[-1]), na.rm = FALSE) / rw.dt[idx]
+    processing.na <- is.na(skel)        # NOTE! HUOM! metadata
+    processing.na[original.na] <- FALSE
     skel[skel > 0] <- NA
     ## rescale from 0 to 10
     na.flag <- is.na(skel)
-    if(all(na.flag))
+    if (all(na.flag)) {
         skel.range <- c(NA, NA)
-    else
+    } else {
         skel.range <- range(skel[!na.flag])
+    }
     newrange <- c(10, 1)
     mult.scalar <-
         (newrange[2] - newrange[1]) / (skel.range[2] - skel.range[1])
     skel <- newrange[1] + (skel - skel.range[1]) * mult.scalar
     skel[skel < 3] <- NA
     skel <- ceiling(skel)
+    threshold.na <- is.na(skel)         # NOTE! HUOM! metadata
+    threshold.na[original.na] <- FALSE
+    threshold.na[processing.na] <- FALSE
 
     ## Variables for plotting
     ## page width
@@ -82,8 +102,12 @@
     n.rows <- ceiling(n / yrs.col)
     m <- seq_len(n.rows)
     row.index <- rep(m, each = yrs.col)[seq_len(n)]
-    skel.df <- data.frame(yr=rw.df$yr, skel)
-    if(plot){
+    skel.df <- data.frame(yr=yr.vec2, skel)
+    if (metadata.out) {
+        skel.df <- cbind(skel.df, data.frame(original.NA, processing.NA,
+                                             threshold.NA))
+    }
+    if (plot) {
         ## master page
         grid.newpage()
         vps <- list()
@@ -138,82 +162,75 @@
             ticks <- seq(from=0, to=rw / 2, by=10)
             init.lab <- min(skel.sub$yr)
             x.labs <- seq(from=init.lab, length.out = length(ticks), by=10)
-            for(j in seq_along(ticks))
-                if(!master)
-                    grid.text(label = x.labs[j],
-                              x=unit(ticks[j] * 2, "mm"),
-                              y=unit(rh + 0.5, "mm"),
-                              just = c("center", "bottom"),
-                              gp = gpar(fontsize=10))
-                else
-                    grid.text(label = x.labs[j],
-                              x=unit(ticks[j] * 2, "mm"),
-                              y=unit(rh - 22.5, "mm"),
-                              just = c("center", "top"),
-                              gp = gpar(fontsize=10))
+            if (master) {
+                textY <- rh - 22.5
+                textJust <- c("center", "top")
+            } else {
+                textY <- rh + 0.5
+                textJust <- c("center", "bottom")
+            }
+            grid.text(label = x.labs,
+                      x=unit(ticks * 2, "mm"),
+                      y=unit(textY, "mm"),
+                      just = textJust,
+                      gp = gpar(fontsize=10))
             ## plot data
-            for(j in seq_along(skel.sub$yr)){
-                if(!is.na(skel.sub$skel[j])){
-                    if(!master)
-                        grid.lines(x=unit(c((j - 1) * 2, (j - 1) * 2), "mm"),
-                                   y=unit(c(0, skel.sub$skel[j] * 2), "mm"),
-                                   gp = gpar(col = "black", lwd = 2, lineend = "square",
-                                   linejoin = "round"))
-                    else
-                        grid.lines(x=unit(c((j - 1) * 2, (j - 1) * 2), "mm"),
-                                   y=unit(c(22, 22 - skel.sub$skel[j] * 2), "mm"),
-                                   gp = gpar(col = "black", lwd = 2, lineend = "square",
-                                   linejoin = "round"))
-                }
-                ## end arrow
-                if(i == n.rows && j == end.yr){
-                    end.mm <- (j - 1) * 2
-                    grid.lines(x=unit(c(end.mm, end.mm), "mm"),
-                               y=unit(c(rh, 0), "mm"),
-                               gp = gpar(lwd = 2, lineend = "square", linejoin = "round"))
-                    if(!master)
-                        grid.polygon(x=unit(c(end.mm, end.mm, end.mm + 2), "mm"),
-                                     y=unit(c(0, 6, 6), "mm"),
-                                     gp=gpar(fill = "black", lineend = "square", linejoin = "round"))
-                    else
-                        grid.polygon(x=unit(c(end.mm, end.mm, end.mm + 2), "mm"),
-                                     y=unit(c(rh, 16, 16), "mm"),
-                                     gp=gpar(fill = "black", lineend = "square", linejoin = "round"))
-                }
+            notna.flag <- !is.na(skel.sub$skel)
+            yr.m1 <- skel.sub$yr[notna.flag] - 1
+            skel.temp <- skel.sub$skel[notna.flag]
+            X <- (which(notna.flag) - 1) * 2
+            n.X <- length(X)
+            Y <- rep(0, n.X)
+            X <- rep(X, each=2)
+            Y <- c(Y, skel.temp * 2)
+            Y <- Y[as.numeric(rbind(seq_len(n.X), seq_len(n.X)+n:X))]
+            if (master) {
+                Y <- 22 - Y
             }
-            ## start arrow and sample id
-            if(i == 1){
-                start.mm <- pad.length * 2
-                grid.lines(x=unit(c(start.mm, start.mm), "mm"),
-                           y=unit(c(rh, 0), "mm"),
-                           gp = gpar(lwd = 2, lineend = "square", linejoin = "round"))
-                fontsize.sname <- ifelse(nchar(sname) > 6, 9, 10)
-                if(!master){
-                    grid.polygon(x=unit(c(start.mm, start.mm, start.mm - 2), "mm"),
-                                 y=unit(c(0, 6, 6), "mm"),
-                                 gp=gpar(fill = "black", lineend = "square", linejoin = "round"))
-                    grid.text(label = sname,
-                              x=unit(start.mm - 1, "mm"),
-                              y=unit(rh - 1, "mm"),
-                              just = c("right", "bottom"),
-                              rot = 90,
-                              gp = gpar(fontsize=fontsize.sname))
-                }
-                else{
-                    grid.polygon(x=unit(c(start.mm, start.mm, start.mm - 2), "mm"),
-                                 y=unit(c(rh, 16, 16), "mm"),
-                                 gp=gpar(fill = "black", lineend = "square", linejoin = "round"))
-                    grid.text(label = sname,
-                              x=unit(start.mm - 1, "mm"),
-                              y=unit(1, "mm"),
-                              just = c("left", "bottom"),
-                              rot = 90,
-                              gp = gpar(fontsize=fontsize.sname))
-                }
-
-            }
-
+            grid.lines(x=unit(X, "mm"),
+                       y=unit(Y, "mm"),
+                       gp = gpar(col = "black", lwd = 2,
+                       lineend = "square", linejoin = "round"))
         }
+        ## end arrow
+        end.mm <- (end.yr - 1) * 2
+        grid.lines(x=unit(c(end.mm, end.mm), "mm"),
+                   y=unit(c(rh, 0), "mm"),
+                   gp = gpar(lwd = 2, lineend = "square", linejoin = "round"))
+        if (master) {
+            Y <- c(rh, 16, 16)
+        } else {
+            Y <- c(0, 6, 6)
+        }
+        grid.polygon(x=unit(c(end.mm, end.mm, end.mm + 2), "mm"),
+                     y=unit(Y, "mm"),
+                     gp=gpar(fill = "black", lineend = "square", linejoin = "round"))
+        ## start arrow and sample id
+        start.mm <- pad.length * 2
+        grid.lines(x=unit(c(start.mm, start.mm), "mm"),
+                   y=unit(c(rh, 0), "mm"),
+                   gp = gpar(lwd = 2, lineend = "square", linejoin = "round"))
+        fontsize.sname <- ifelse(nchar(sname) > 6, 9, 10)
+        if (master) {
+            textY <- 1
+            polyY <- c(rh, 16, 16)
+            textJust <- c("left", "bottom")
+        } else {
+            textY <- rh - 1
+            polyY <- c(0, 6, 6)
+            textJust <- c("right", "bottom")
+        }
+        grid.polygon(x=unit(c(start.mm, start.mm, start.mm - 2), "mm"),
+                     y=unit(polyY, "mm"),
+                     gp=gpar(fill = "black", lineend = "square", linejoin = "round"))
+        grid.text(label = sname,
+                  x=unit(start.mm - 1, "mm"),
+                  y=unit(textY, "mm"),
+                  just = textJust,
+                  rot = 90,
+                  gp = gpar(fontsize=fontsize.sname))
     }
-    if(dat.out) return(skel.df)
+    if (dat.out) {
+        return(skel.df)
+    }
 }

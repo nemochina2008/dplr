@@ -1,6 +1,7 @@
 `chron` <-
     function(x, prefix="xxx", biweight=TRUE, prewhiten=FALSE)
 {
+    check.flags(prewhiten, biweight)
     prefix.str <- as.character(prefix)
     if (length(prefix.str) != 1 || nchar(prefix.str) > 3) {
         stop("'prefix' must be a character string with less than 4 characters")

@@ -8,6 +8,10 @@ rcs <- function(rwl, po, nyrs=NULL, f=0.5, biweight=TRUE, ratios=TRUE,
         stop("dimension problem: ", "'ncol(rw)' != 'nrow(po)'")
     }
     col.names <- names(rwl)
+    if (is.null(col.names) || anyDuplicated(col.names) ||
+        any(is.na(col.names))) {
+        stop("'rwl' must have unique, non-NA names")
+    }
     if (!all(sort(po[, 1]) == sort(col.names))) {
         stop("series ids in 'po' and 'rwl' do not match")
     }
@@ -17,6 +21,8 @@ rcs <- function(rwl, po, nyrs=NULL, f=0.5, biweight=TRUE, ratios=TRUE,
     if (!all(is.int(po[, 2]))) {
         stop("each value in 'po' must be an integer")
     }
+    check.flags(zero.is.missing, make.plot, rc.out, ratios, biweight)
+
     seq.cols <- seq_len(n.col)
     rwl2 <- rwl
     rownames(rwl2) <- rownames(rwl2) # guard against NULL names funniness
@@ -44,12 +50,17 @@ rcs <- function(rwl, po, nyrs=NULL, f=0.5, biweight=TRUE, ratios=TRUE,
 
     ## spline follows B&Q 2008 as 10% of the RC length
     good.idx <- which(!is.na(ca.m))
-    n.good <- length(good.idx)
     if (is.null(nyrs)) {
-        if (n.good < 10) {
+        n.good <- length(good.idx)
+        if (n.good >= 1) {
+            rc.extent <- good.idx[n.good] - good.idx[1] + 1
+        } else {
+            rc.extent <- 0
+        }
+        if (rc.extent < 10) {
             nyrs2 <- 0
         } else {
-            nyrs2 <- floor(n.good * 0.1)
+            nyrs2 <- floor(rc.extent * 0.1)
         }
     } else {
         nyrs2 <- nyrs

@@ -60,6 +60,7 @@ rwi.stats.running <- function(rwi, ids=NULL, period=c("max", "common"),
                               round.decimals=3,
                               zero.is.missing=TRUE) {
     period2 <- match.arg(period)
+    check.flags(zero.is.missing, running.window)
 
     if (running.window) {
         if (window.length < 3) {

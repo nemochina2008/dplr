@@ -7,6 +7,7 @@
     method2 <- match.arg(arg = method,
                          choices = known.methods,
                          several.ok = TRUE)
+    check.flags(make.plot)
     if (!is.data.frame(rwl)) {
         stop("'rwl' must be a data.frame")
     }

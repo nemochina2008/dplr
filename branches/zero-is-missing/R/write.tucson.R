@@ -32,6 +32,7 @@ format.tucson <- (function() {
     if (!(prec == 0.01 || prec == 0.001)) {
         stop("'prec' must equal 0.01 or 0.001")
     }
+    check.flags(long.names, mapping.append, append)
     header2 <- header
     if (append) {
         if (!file.exists(fname)) {

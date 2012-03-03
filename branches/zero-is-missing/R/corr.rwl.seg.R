@@ -15,6 +15,7 @@ corr.rwl.seg <- function(rwl, seg.length=50, bin.floor=100, n=NULL,
 
     ## run error checks
     qa.xdate(rwl, seg.length, n, bin.floor)
+    check.flags(floor.plus1, make.plot, biweight, prewhiten)
 
     ## turn off warnings for this function
     ## The sig test for spearman's rho often produces warnings.

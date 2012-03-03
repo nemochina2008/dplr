@@ -1,6 +1,7 @@
 `read.tucson` <- function(fname, header = NULL, long = FALSE,
                           encoding = getOption("encoding"))
 {
+    check.flags(long)
     ## Open the data file (stateless, opened on-demand)
     con <- file(fname, encoding = encoding)
     on.exit(close(con))
@@ -25,9 +26,13 @@
             cat(gettext("There does not appear to be a header in the rwl file\n",
                         domain="R-dplR"))
         }
-    } else if (!is.logical(header)) {
-        stop("'header' must be NULL or logical")
     } else {
+        tryCatch(check.flags(header),
+                 error = function(e) {
+                     cat(gettext("'header' must be NULL or logical\n",
+                                 domain="R-dplR"))
+                     stop(e)
+                 })
         is.head <- header
     }
     if (is.head) {

@@ -28,6 +28,7 @@ write.compact <- function(rwl.df, fname, append=FALSE, prec=0.01,
     if (append && !file.exists(fname)) {
         stop(gettextf("file %s does not exist, cannot append", fname))
     }
+    check.flags(mapping.append, append)
 
     ## Loop through series and write each one
     nseries <- ncol(rwl.df)

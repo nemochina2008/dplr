@@ -9,6 +9,7 @@ wavelet.plot <-
              crn.col = "black", crn.lwd = 1,
              crn.ylim = range(wave.list$y)*1.1, side.by.side = FALSE)
 {
+    check.flags(side.by.side, add.spline, add.sig, add.coi)
 
     ## Wavelet transform variables:
     y <- wave.list$y

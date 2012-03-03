@@ -3,6 +3,7 @@
     if (ncol(crn) != 2) {
         stop("'crn' must have 2 columns")
     }
+    check.flags(append)
     crn2 <- crn
 
     if (any(is.na(crn2))) {
@@ -21,7 +22,7 @@
         }
     }
     header2 <- header
-    if(length(header2) > 0){
+    if (length(header2) > 0) {
         if (!is.list(header2)) {
             stop("header must be a list")
         }
