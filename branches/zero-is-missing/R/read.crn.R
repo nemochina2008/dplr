@@ -122,10 +122,15 @@
     }
     ## Clean up NAs
     crn.mat[which(crn.mat[, -ncol.crn.mat] == 9990)] <- NA # column-major order
-    crn.mat <-
-        crn.mat[!apply(is.na(crn.mat[, -ncol.crn.mat, drop=FALSE]), 1, all),
-                ,
-                drop=FALSE]
+    good.idx <- which(!apply(is.na(crn.mat[, -ncol.crn.mat, drop=FALSE]),
+                             1, all))
+    n.good <- length(good.idx)
+    if (n.good > 0) {
+        idx.seq <- good.idx[1]:good.idx[n.good]
+    } else {
+        idx.seq <- numeric(0)
+    }
+    crn.mat <- crn.mat[idx.seq, , drop=FALSE]
     ## If samp depth is all 1 then dump it
     sd.one <- all(crn.mat[, ncol.crn.mat] == 1)
     if (sd.one) {

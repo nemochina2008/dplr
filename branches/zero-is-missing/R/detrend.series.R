@@ -1,39 +1,30 @@
 `detrend.series` <-
     function(y, y.name = "", make.plot = TRUE,
              method = c("Spline", "ModNegExp", "Mean"),
-             nyrs = NULL, f = 0.5, pos.slope = FALSE,
-             zero.is.missing = TRUE)
+             nyrs = NULL, f = 0.5, pos.slope = FALSE)
 {
     known.methods <- c("Spline", "ModNegExp", "Mean")
     method2 <- match.arg(arg = method,
                          choices = known.methods,
                          several.ok = TRUE)
-    check.flags(zero.is.missing, pos.slope, make.plot)
+    check.flags(pos.slope, make.plot)
     ## Remove NA from the data (they will be reinserted later)
     good.y <- which(!is.na(y))
     n.good <- length(good.y)
-    if (zero.is.missing && n.good > 0) {
-        good.y <- good.y[y[good.y] != 0]
-        n.good <- length(good.y)
-    }
     if(n.good == 0) {
         stop("all values are 'NA'")
-    } else if(!zero.is.missing && any(diff(good.y) != 1)) {
-        stop("'NA's are not allowed in the middle of the series")
     }
     y2 <- y[seq(from = good.y[1], to = good.y[n.good], by = 1)]
     n.y2 <- length(y2)
-    if (zero.is.missing) {
-        good.y2 <- good.y - (good.y[1] - 1)
-        good.flag <- rep(FALSE, n.y2)
-        good.flag[good.y2] <- TRUE
-        y2[!good.flag] <- NA_real_
-    } else {
-        ## Recode any zero values to 0.001
-        good.y2 <- seq_along(y2)
-        good.flag <- rep(TRUE, n.y2)
-        y2[y2 == 0] <- 0.001
-    }
+    good.y2 <- good.y - (good.y[1] - 1)
+    good.flag <- rep(FALSE, n.y2)
+    good.flag[good.y2] <- TRUE
+
+    ## ## Recode any zero values to 0.001
+    ## good.y2 <- seq_along(y2)
+    ## good.flag <- rep(TRUE, n.y2)
+    ## y2[y2 == 0] <- 0.001
+
     y3 <- y2[good.y2]
 
     resids <- list()

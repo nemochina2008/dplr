@@ -1,5 +1,6 @@
-read.compact <- function(fname)
+read.compact <- function(fname, zero.as.na = TRUE)
 {
+    check.flags(zero.as.na)
     res <- .Call(dplR.rcompact, path.expand(fname))
     min.year <- res[[1]]
     max.year <- res[[2]]
@@ -11,6 +12,11 @@ read.compact <- function(fname)
     project.comments <- res[[8]]
     rownames(rw.mat) <- min.year:max.year
     nseries <- ncol(rw.mat)
+    ## Negative values are undoubtedly best treated as NA
+    rw.mat[rw.mat < 0] <- NA
+    if (zero.as.na) {
+        rw.mat[rw.mat == 0] <- NA
+    }
 
     cat(sprintf(ngettext(nseries,
                          "There is %d series\n",

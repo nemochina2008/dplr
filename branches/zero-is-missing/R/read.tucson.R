@@ -1,7 +1,8 @@
 `read.tucson` <- function(fname, header = NULL, long = FALSE,
-                          encoding = getOption("encoding"))
+                          encoding = getOption("encoding"),
+                          zero.as.na = TRUE)
 {
-    check.flags(long)
+    check.flags(zero.as.na, long)
     ## Open the data file (stateless, opened on-demand)
     con <- file(fname, encoding = encoding)
     on.exit(close(con))
@@ -145,22 +146,10 @@
     ## trim
     yrs <- min.year0:max.year0
     rw.mat <- rw.mat[as.numeric(rownames(rw.mat)) %in% yrs, , drop=FALSE]
-    ## Fix internal NAs. These are coded as 0 in the DPL programs
-    fix.internal.na <- function(x) {
-        na.flag <- is.na(x)
-        good.idx <- which(!na.flag)
-        y <- x
-        if (length(good.idx) >= 2) {
-            min.good <- min(good.idx)
-            max.good <- max(good.idx)
-            fix.flag <- na.flag & c(rep(FALSE, min.good),
-                                    rep(TRUE, max.good-min.good-1),
-                                    rep(FALSE, length(x)-max.good+1))
-            y[fix.flag] <- 0
-        }
-        y
+    if (zero.as.na) {
+        rw.mat[rw.mat == 0] <- NA
     }
-    rw.df <- as.data.frame(apply(rw.mat, 2, fix.internal.na))
+    rw.df <- as.data.frame(rw.mat)
     names(rw.df) <- as.character(series.ids)
     rw.df
 }

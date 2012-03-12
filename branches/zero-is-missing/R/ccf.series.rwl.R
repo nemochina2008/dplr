@@ -6,17 +6,27 @@ ccf.series.rwl <- function(rwl, series,
                            floor.plus1 = FALSE, ...) {
 
     ## run error checks
+    if(!is.data.frame(rwl)) {
+        stop("'rwl' must be a data.frame")
+    }
     qa.xdate(rwl, seg.length, n, bin.floor)
     if (lag.max > seg.length) {
         stop("'lag.max' > 'seg.length'")
     }
     check.flags(floor.plus1, make.plot, biweight, prewhiten)
+    rwl2 <- rwl
+    if (!all(diff(as.numeric(row.names(rwl))) == 1)) {
+        rwl2 <- complete.rwl.df(rwl)
+    }
     seg.lag <- seg.length / 2
 
     ## Normalize.
     series2 <- series
     names(series2) <- series.yrs
-    tmp <- normalize.xdate(rwl, series2, n, prewhiten, biweight)
+    if (!all(diff(series.yrs) == 1)) {
+        series2 <- complete.series(series)
+    }
+    tmp <- normalize.xdate(rwl2, series2, n, prewhiten, biweight)
     master <- tmp$master
 
     ## trim master so there are no NaN like dividing when only one
@@ -27,7 +37,7 @@ ccf.series.rwl <- function(rwl, series,
 
     series2 <- tmp$series
     series.yrs2 <- as.numeric(names(series2))
-    ## trim series in case it was submitted stright from the rwl
+    ## trim series in case it was submitted straight from the rwl
     idx.good <- !is.na(series2)
     series.yrs2 <- series.yrs2[idx.good]
     series2 <- series2[idx.good]

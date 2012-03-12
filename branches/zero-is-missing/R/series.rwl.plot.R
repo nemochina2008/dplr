@@ -123,8 +123,8 @@ series.rwl.plot <-
     }
     ## plot 4
     plot(c(-1, 1), c(-2, 1), type="n", ylab="", xlab="", axes=FALSE)
-    txt1 <- gettextf("Series:%d-%d", min(na.omit(series.yrs0)),
-                     max(na.omit(series.yrs0)), domain="R-dplR")
+    txt1 <- gettextf("Series:%d-%d", min(series.yrs0, na.rm=TRUE),
+                     max(series.yrs0, na.rm=TRUE), domain="R-dplR")
     text(-1, 1, txt1, pos=4)
     txt2 <- gettextf("Master:%d-%d", min(yrs0, na.rm=TRUE),
                      max(yrs0, na.rm=TRUE), domain="R-dplR")

@@ -1,3 +1,34 @@
+### Creates a rwl data.frame with consecutive years
+complete.rwl.df <- function(rwl) {
+    cnames <- names(rwl)
+    yrs <- as.numeric(row.names(rwl))
+    min.yr <- min(yrs)
+    max.yr <- max(yrs)
+    yrs <- min.yr : max.yr
+    rwl2 <- matrix(NA_real_,
+                   nrow = max.yr - min.yr + 1,
+                   ncol = length(rwl),
+                   dimnames = list(as.character(yrs), cnames))
+    rwl.tmp <- as.matrix(rwl)
+    for (rname in row.names(rwl)) {
+        rwl2[rname, ] <- rwl.tmp[rname, ]
+    }
+    as.data.frame(rwl2)
+}
+
+### Creates a series (vector) with consecutive years.
+### Names must be present.
+complete.series <- function(series) {
+    names.series <- names(series)
+    yrs <- as.numeric(names.series)
+    min.yr <- min(yrs)
+    max.yr <- max(yrs)
+    series2 <- rep(NA_real_, max.yr - min.yr + 1)
+    names(series2) <- as.character(min.yr : max.yr)
+    series2[names.series] <- series
+    series2
+}
+
 ### Checks that all arguments are TRUE or FALSE
 check.flags <- function(...) {
     flag.bad <- vapply(list(...),
@@ -81,13 +112,165 @@ dec <- function(from, to) {
     }
 }
 
+### Levinson-Durbin algorithm for esmating an AR process from
+### an autocovariance sequence.
+### The same algorithm is used in stats::ar.yw().
+levDurb <- function(acov) {
+    order.max <- length(acov) - 1
+    b <- vector(mode = "list", length = order.max)
+    partialacf <- numeric(order.max)
+    v <- rep(NA_real_, order.max)
+    b[[1]] <- partialacf[1] <- b.temp <- acov[2] / acov[1]
+    v[1] <- acov[1] * (1 - b.temp * b.temp)
+    for (k in seq(from = 2, by = 1, length.out = order.max - 1)) {
+        b.kk <- partialacf[k] <-
+            (acov[k+1] - sum(b.temp * acov[k:2])) / v[k-1]
+        b[[k]] <- b.temp <- c(b.temp - b.kk * rev(b.temp), b.kk)
+        v[k] <- v[k-1] * (1 - b.kk * b.kk)
+    }
+    list(coeffs = b, var = v, partialacf = partialacf)
+}
+
 ### AR function for chron, normalize1, normalize.xdate, ...
-ar.func <- function(x) {
-    y <- x
-    idx.goody <- !is.na(y)
-    ar1 <- ar(y[idx.goody])
-    y[idx.goody] <- ar1$resid+ar1$x.mean
-    y
+### The results should agree with those obtained by using standard ar.yw()
+### in a non-NA case.
+ar.func <- function(x, pass.na=TRUE, lag.max=NULL) {
+    if (pass.na) {
+        na.act <- na.pass
+    } else {
+        na.act <- na.fail
+    }
+    idx.good <- which(!is.na(x))
+    n.good <- length(idx.good)
+
+    if (n.good > 0) {
+        idx.seq <- idx.good[1]:idx.good[n.good]
+        x.used <- x[idx.seq]
+        n.used <- length(x.used)
+        x.mean <- mean(x.used, na.rm = TRUE)
+        x.demeaned <- x.used - x.mean
+        ## Autocovariance sequence
+        ## NOTE: if pass.na and NAs present, sequence may not be valid
+        ACs <- acf(x.demeaned, type = "covariance",
+                   na.action = na.act, lag.max = lag.max,
+                   demean = FALSE, plot = FALSE)
+        acov <- drop(ACs$acf)
+        lags <- drop(ACs$lag)
+
+        ## Check which lags are present in the autocovariance sequence
+        notna <- !is.na(acov)
+        acov <- acov[notna]
+        lags <- lags[notna]
+        lags.required <- seq(from = 0, by = 1,
+                             length.out = max(1, length(lags)))
+        lags.present <- lags.required %in% lags
+        if (all(lags.present)) {
+            acov <- acov[match(lags.required, lags)]
+            order.max <- length(acov) - 1
+        } else {
+            first.missing <- lags.required[min(which(!lags.present))]
+            order.max <- first.missing - 1
+            acov <- acov[match(seq_len(first.missing) - 1, lags)]
+        }
+
+        ## Check if acov is OK, try to fix if it isn't
+        if (order.max >= 1 && n.good < n.used) {
+            acov.mat <- toeplitz(acov)
+            eigval <- eigen(acov.mat, symmetric=TRUE)$values
+            if (any(eigval < 0)) {
+                acov.new <- try(nearPD(acov.mat, corr = FALSE,
+                                       keepDiag = TRUE,
+                                       do2eigen = TRUE,
+                                       ensureSymmetry = FALSE),
+                                silent = FALSE)
+                if (inherits(acov.new, "try-error")) {
+                    order.max <- 0
+                } else {
+                    n.rc <- order.max + 1
+                    acov.mean <- numeric(n.rc)
+                    col.idx <- rep(1:n.rc, each=n.rc)
+                    row.idx <- rep(1:n.rc, n.rc)
+                    new.mat <- acov.new$mat
+                    for (k in 0:order.max) {
+                        acov.mean[k+1] <-
+                            mean(new.mat[abs(row.idx - col.idx) == k])
+                    }
+                    eigval2 <- eigen(toeplitz(acov.mean),
+                                     symmetric=TRUE)$values
+                    if (any(eigval2 < 0)) {
+                        order.max <- 0
+                    } else {
+                        acov <- acov.mean
+                    }
+                }
+            }
+        }
+
+        if (order.max >= 1) {
+            ## AR process
+            ARproc <- levDurb(acov)
+            var.temp <- c(acov[1], ARproc$var)
+            if (any(is.na(var.temp) | var.temp <= 0)) {
+                order.max <- 0
+            }
+        }
+        if (order.max >= 1) {
+            aic <- n.good * log(var.temp) + 2 * seq_len(1 + order.max)
+                partialacf <- ARproc$partialacf
+            aic <- aic - min(aic)
+            ## Select order by minimum AIC
+            chosen.order <- which.min(aic) - 1
+        } else if (order.max == 0) {
+            var.temp <- acov[1]
+            aic <- n.good * log(var.temp) + 2
+            partialacf <- numeric(0)
+            chosen.order <- order.max
+        } else {
+            aic <- numeric(0)
+            partialacf <- numeric(0)
+            chosen.order <- order.max
+        }
+        names(aic) <- as.character(seq(from = 0, by = 1,
+                                       length.out = order.max + 1))
+
+        if (chosen.order > 0) {
+            ar <- ARproc$coeffs[[chosen.order]]
+            y <- rep(NA_real_, length(x))
+            resid.plus.mean <-
+                x.used - c(rep(NA_real_, chosen.order),
+                           drop(embed(x.demeaned[-n.used],
+                                      chosen.order) %*% ar))
+            ## Check that variance really decreased.
+            ## Don't know if the contrary is possible in a case with NAs.
+            if (n.good < n.used &&
+                var(resid.plus.mean, na.rm=TRUE) >= var(x.used, na.rm=TRUE)) {
+                chosen.order <- 0
+                aic[-1] <- NA # unreliable values
+            }
+        }
+        if (chosen.order > 0) {
+            y[idx.seq] <- resid.plus.mean
+            var.pred <- var.temp[chosen.order + 1] * n.good /
+                (sum(!is.na(resid.plus.mean)) - 1)
+        } else {
+            ar <- numeric(0)
+            var.pred <- var(x.used, na.rm=TRUE)
+            y <- x
+        }
+        if (order.max < 0) {
+            chosen.order <- NA_real_
+            order.max <- NA_real_
+        }
+    } else {
+        y <- x
+        chosen.order <- NA_real_
+        order.max <- NA_real_
+        var.pred <- NA_real_
+        aic <- ar <- partialacf <- numeric(0)
+    }
+    list(y = y, order = chosen.order, aic = aic, ar = ar,
+         order.max = order.max, partialacf = partialacf,
+         var.pred = var.pred)
 }
 
 ### Range of years. Used in cms, rcs, rwl.stats, seg.plot, spag.plot, ...

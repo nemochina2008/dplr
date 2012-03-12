@@ -1,5 +1,5 @@
 rcs <- function(rwl, po, nyrs=NULL, f=0.5, biweight=TRUE, ratios=TRUE,
-                rc.out=FALSE, make.plot=TRUE, zero.is.missing=TRUE, ...) {
+                rc.out=FALSE, make.plot=TRUE, ...) {
     if (!is.data.frame(rwl)) {
         stop("'rwl' must be a data.frame")
     }
@@ -21,16 +21,13 @@ rcs <- function(rwl, po, nyrs=NULL, f=0.5, biweight=TRUE, ratios=TRUE,
     if (!all(is.int(po[, 2]))) {
         stop("each value in 'po' must be an integer")
     }
-    check.flags(zero.is.missing, make.plot, rc.out, ratios, biweight)
+    check.flags(make.plot, rc.out, ratios, biweight)
 
     seq.cols <- seq_len(n.col)
     rwl2 <- rwl
     rownames(rwl2) <- rownames(rwl2) # guard against NULL names funniness
     yrs <- as.numeric(row.names(rwl2))
     stopifnot(diff(yrs) == 1)
-    if (zero.is.missing) {
-        rwl2[rwl2 == 0] <- NA
-    }
 
     rwl.ord <- apply(rwl2, 2, sortByIndex)
     rwca <- matrix(NA,

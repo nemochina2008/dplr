@@ -1,4 +1,4 @@
-cms <- function(rwl, po, c.hat.t=FALSE, c.hat.i=FALSE, zero.is.missing=TRUE) {
+cms <- function(rwl, po, c.hat.t=FALSE, c.hat.i=FALSE) {
     ## support func
     biologicalTrend <- function(tt, theDat.2){
         tt.p1 <- tt + 1
@@ -29,12 +29,9 @@ cms <- function(rwl, po, c.hat.t=FALSE, c.hat.i=FALSE, zero.is.missing=TRUE) {
     if (!all(sort(po[[1]]) == sort(col.names))) {
         stop("series ids in 'po' and 'rwl' do not match")
     }
-    check.flags(zero.is.missing, c.hat.i, c.hat.t)
+    check.flags(c.hat.i, c.hat.t)
     rownames(rwl2) <- rownames(rwl2) # guard against NULL names funniness
     n.row <- nrow(rwl2)
-    if (zero.is.missing) {
-        rwl2[rwl2 == 0] <- NA_real_
-    }
 
     ## divide each series by c curve and restore to cal years
     rwi <- rwl2

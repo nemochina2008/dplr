@@ -1,4 +1,5 @@
-read.fh <- function(fname) {
+read.fh <- function(fname, zero.as.na = TRUE) {
+    check.flags(zero.as.na)
     inp <- readLines(fname, ok=TRUE, warn=FALSE)
     ## get start and end positions of data blocks
     header.begin <- c(grep("^HEADER:$", inp), length(inp) + 1)
@@ -82,5 +83,8 @@ read.fh <- function(fname) {
                keycodes, "\t",
                start.years, "\t",
                end.years, "\n"), sep="")
+    if (zero.as.na) {
+        dendro.matrix[dendro.matrix == 0] <- NA
+    }
     as.data.frame(dendro.matrix) # return data.frame
 }

@@ -1,12 +1,11 @@
 `skel.plot` <-
     function(rw.vec, yr.vec = NULL, sname = "", filt.weight = 9,
-             dat.out = FALSE, master=FALSE, plot=TRUE, zero.is.missing=TRUE,
-             metadata.out = FALSE)
+             dat.out = FALSE, master=FALSE, plot=TRUE, metadata.out = FALSE)
 {
     if (nchar(sname) > 7) {
         stop("'sname' must be a character string less than 8 characters long")
     }
-    check.flags(zero.is.missing, plot, master, dat.out)
+    check.flags(metadata.out, plot, master, dat.out)
 
     na.mask <- is.na(rw.vec)
     notna.idx <- which(!na.mask)
@@ -36,12 +35,6 @@
         yr.vec2 <- 0:(n.val - 1)
     } else {
         yr.vec2 <- yr.vec[notna.idx[1]:notna.idx[n.notna]]
-    }
-    if (zero.is.missing) {
-        ## Convert internal NAs (0) to real NAs.
-        ## The NAs will propagate, also affecting the surrounding years.
-        zero.flag <- rw.vec2 == 0
-        rw.vec2[zero.flag] <- NA
     }
     original.na <- is.na(rw.vec2)       # NOTE! HUOM! metadata
     ## pad down to the nearest 10 if not already there

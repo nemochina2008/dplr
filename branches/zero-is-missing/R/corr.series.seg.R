@@ -117,10 +117,20 @@ corr.series.seg <- function(rwl, series, series.yrs=as.numeric(names(series)),
     }
     ## plot
     if (make.plot) {
-        mcor.tmp <- na.omit(res.mcor)
+        idx.good <- which(!is.na(res.mcor[, 1]))
+        n.good <- length(idx.good)
+        if (n.good > 0) {
+            mcor.tmp <- res.mcor[idx.good[1]:idx.good[n.good], 1, drop=FALSE]
+        } else {
+            mcor.tmp <- res.mcor[numeric(0), 1, drop=FALSE]
+        }
         yrs.tmp <- as.numeric(rownames(mcor.tmp))
         mcor.tmp <- mcor.tmp[, 1]
-        n.below <- ceiling(max(0, min.bin - min(yrs.tmp)) / seg.lag)
+        if (length(yrs.tmp) > 0) {
+            n.below <- ceiling(max(0, min.bin - min(yrs.tmp)) / seg.lag)
+        } else {
+            n.below <- 0
+        }
         start.below <- seq(from=min.bin - n.below * seg.lag, by=seg.lag,
                            length.out=n.below)
         ticks <- c(start.below, bins[, 1], bins[c(nbins - 1, nbins), 2] + 1)

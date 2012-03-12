@@ -57,10 +57,9 @@ rwi.stats.running <- function(rwi, ids=NULL, period=c("max", "common"),
                               window.overlap=floor(window.length / 2),
                               first.start=NULL,
                               min.corr.overlap=min(30, window.length),
-                              round.decimals=3,
-                              zero.is.missing=TRUE) {
+                              round.decimals=3) {
     period2 <- match.arg(period)
-    check.flags(zero.is.missing, running.window)
+    check.flags(running.window)
 
     if (running.window) {
         if (window.length < 3) {
@@ -78,15 +77,6 @@ rwi.stats.running <- function(rwi, ids=NULL, period=c("max", "common"),
 
     rwi2 <- as.matrix(rwi)
     n.cores <- ncol(rwi2)
-
-    zero.flag <- rwi2 == 0
-    if (any(zero.flag, na.rm=TRUE)) {
-        if (!zero.is.missing) {
-            warning("There are zeros in the data. Consider the option 'zero.is.missing'.")
-        } else {
-            rwi2[zero.flag] <- NA
-        }
-    }
 
     ## If 'ids' is NULL then assume one core per tree
     if (is.null(ids)) {

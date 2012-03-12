@@ -5,20 +5,12 @@ Various .R files
 
 - prettier, more consistent formatting of source code
 - check.flags() used for argument checking (see helpers.R)
-
-Files: cms.R, detrend.series.R, rcs.R, skel.plot.R
---------------------------------------------------
-
-- The new parameter zero.is.missing=TRUE, like in
-  rwi.stats.running(), treats internal NAs (marked with 0) properly,
-  i.e. not included in the computation of means / estimation of
-  other parameters, etc.  The exported functions defined in the
-  files now also support internal NAs marked with NA. Previously the
-  behavior in such cases was undefined.  Exception: skel.plot()
-  already worked with internal NAs marked with NA, which
-  traditionally is not supported in dplR.  Consequently, the output
-  of these functions with zero.is.missing=TRUE may contain NA values
-  where non-NA values would be seen with zero.is.missing=FALSE.
+- Policy change: internal NAs in ring width series are now
+  presented as NAs. The previous policy was to mark them with
+  0. Consequently, the output of some functions may contain NA
+  values where non-NA values would have been seen before the policy
+  change.
+- Many (not all) functions have been updated to handle NA data.
 
 File: helpers.R
 ---------------

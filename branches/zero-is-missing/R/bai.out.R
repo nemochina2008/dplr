@@ -1,7 +1,9 @@
-bai.out <- function(rwl, diam = NULL) {
+bai.out <- function(rwl, diam = NULL, warn.na = TRUE) {
 
-    if(!is.data.frame(rwl))
+    check.flags(warn.na)
+    if(!is.data.frame(rwl)) {
         stop("'rwl' must be a data.frame")
+    }
     if(!is.null(diam)) {
         if(ncol(rwl) != nrow(diam))
             stop("dimension problem: ", "'ncol(rw)' != 'nrow(diam)'")
@@ -9,26 +11,41 @@ bai.out <- function(rwl, diam = NULL) {
             stop("series ids in 'diam' and 'rwl' do not match")
         diam.vec <- diam[, 2]
     }
+    rwl2 <- rwl
+    if (!all(diff(as.numeric(row.names(rwl))) == 1)) {
+        rwl2 <- complete.rwl.df(rwl)
+    }
 
-    out <- rwl
+    out <- rwl2
     ## vector of years
-    n.vec <- seq_len(nrow(rwl))
-    for(i in seq_len(ncol(rwl))){
+    n.vec <- seq_len(nrow(rwl2))
+    for(i in seq_len(ncol(rwl2))){
         ## series to work with
-        dat <- rwl[[i]]
+        dat <- rwl2[[i]]
         ## strip out data from NA
-        dat2 <- na.omit(dat)
-        ## get diameter if not given
-        if(is.null(diam)) d <- sum(dat2)*2
-        else d <- diam.vec[i]
-        ## get ring area
-        r0 <- d/2 - c(0, cumsum(rev(dat2)))
-        bai <- -pi*rev(diff(r0*r0))
-        ## find NA / not NA locations
-        na <- attributes(dat2)$na.action
-        no.na <- n.vec[!n.vec %in% na]
-        ## write result
-        out[no.na, i] <- bai
+        idx.good <- which(!is.na(dat))
+        n.good <- length(idx.good)
+        if (n.good > 0) {
+            first.good <- idx.good[1]
+            last.good <- idx.good[n.good]
+            idx.seq <- first.good:last.good
+            dat2 <- dat2[idx.seq]
+            ## get diameter if not given
+            if (is.null(diam)) {
+                d <- sum(dat2)*2
+            } else {
+                d <- diam.vec[i]
+            }
+            ## get ring area
+            r0 <- d/2 - c(0, cumsum(rev(dat2)))
+            bai <- -pi*rev(diff(r0*r0))
+            if (warn.na && any(is.na(bai))) {
+                warning(gettextf("NA values in series %s",
+                                 names(rwl2)[i]), domain=NA)
+            }
+            ## write result
+            out[idx.seq, i] <- bai
+        }
     }
     ## return result
     out

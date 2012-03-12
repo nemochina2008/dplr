@@ -38,16 +38,8 @@ corr.rwl.seg <- function(rwl, seg.length=50, bin.floor=100, n=NULL,
 
     ## Ensure that rwl has consecutive years in increasing order
     if (!all(diff(yrs) == 1)) {
-        yrs <- min.yr : max.yr
-        rwl2 <- matrix(NA_real_,
-                       nrow = max.yr - min.yr + 1,
-                       ncol = nseries,
-                       dimnames = list(as.character(yrs), cnames))
-        rwl.tmp <- as.matrix(rwl)
-        for (rname in row.names(rwl)) {
-            rwl2[rname, ] <- rwl.tmp[rname, ]
-        }
-        rwl2 <- as.data.frame(rwl2)
+        rwl2 <- complete.rwl.df(rwl)
+        yrs <- min.yr:max.yr
     }
 
     ## Pad rwl and master (if present) to same number of years
