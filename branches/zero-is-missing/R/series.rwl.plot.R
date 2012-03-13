@@ -24,18 +24,29 @@ series.rwl.plot <-
     tmp <- normalize.xdate(rwl, series2, n, prewhiten, biweight)
     master <- tmp$master
 
-    ## trim master so there are no NaN like dividing when
-    ## only one series for instance.
-    idx.good <- !is.nan(master)
-    master <- master[idx.good]
+    ## trim master
+    idx.good <- which(!is.nan(master))
+    n.good <- length(idx.good)
+    if (n.good > 0) {
+        master <- master[idx.good[1]:idx.good[n.good]]
+    } else {
+        master <- master[numeric(0)]
+    }
     yrs <- as.numeric(names(master))
 
     series2 <- tmp$series
     series.yrs2 <- as.numeric(names(series2))
     ## trim series in case it was submitted stright from the rwl
-    idx.good <- !is.na(series2)
-    series.yrs2 <- series.yrs2[idx.good]
-    series2 <- series2[idx.good]
+    idx.good <- which(!is.na(series2))
+    n.good <- length(idx.good)
+    if (n.good > 0) {
+        tmp.seq <- idx.good[1]:idx.good[n.good]
+        series.yrs2 <- series.yrs2[tmp.seq]
+        series2 <- series2[tmp.seq]
+    } else {
+        series.yrs2 <- series.yrs2[numeric(0)]
+        series2 <- series2[numeric(0)]
+    }
 
     ## clip series to master dimensions
     series2 <- series2[series.yrs2 %in% yrs]
@@ -51,10 +62,11 @@ series.rwl.plot <-
     } else {
         min.bin <- ceiling(min(series.yrs2) / bin.floor) * bin.floor
     }
-    to <- max(series.yrs2) - seg.length - seg.lag + 1
+    max.series.yrs2 <- max(series.yrs2)
+    to <- max.series.yrs2 - seg.length - seg.lag + 1
     if (min.bin > to) {
         cat(gettextf("maximum year in (filtered) series: %d\n",
-                     max(series.yrs2)))
+                     max.series.yrs2))
         cat(gettextf("first bin begins: %d\n", min.bin))
         cat(gettext("cannot fit two segments (not enough years in the series)\n"))
         stop("shorten 'seg.length' or adjust 'bin.floor'")
@@ -65,12 +77,13 @@ series.rwl.plot <-
 
     op <- par(no.readonly=TRUE)
     on.exit(par(op), add = TRUE)
+    max.series.master <- max(series2, master, na.rm=TRUE)
     layout(matrix(c(1, 3, 2, 4), 2, 2), widths = c(1, 0.5),
            heights = c(1, 0.5))
     par(mar=c(4, 2, 2, 1) + 0.1, mgp=c(1.25, 0.25, 0), tcl=0.25)
     col.pal <- c("#E41A1C", "#377EB8", "#4DAF4A")
     ## plot 1
-    plot(yrs, series2, type="n", ylim=c(0, max(series2, master, na.rm=TRUE)),
+    plot(yrs, series2, type="n", ylim=c(0, max.series.master),
          ylab=gettext("RWI", domain="R-dplR"),
          xlab=gettext("Year", domain="R-dplR"), axes=FALSE)
     all.ticks <- c(bins[, 1], bins[c(nbins - 1, nbins), 2] + 1)
@@ -84,9 +97,10 @@ series.rwl.plot <-
     axis(3, at=even.ticks)
     axis(2)
     box()
+    min.yrs <- min(yrs)
     lines(yrs, series2, lwd=1.5, col=col.pal[1])
     lines(yrs, master, lwd=1.5, col=col.pal[2])
-    legend(x = min(yrs, na.rm=TRUE), y = max(series2, master, na.rm=TRUE),
+    legend(x = min.yrs, y = max.series.master,
            legend = gettext(c("Detrended Series", "Detrended Master"),
            domain="R-dplR"),
            col = c(col.pal[1], col.pal[2]), lty = "solid", lwd=1.5, bg="white")
@@ -131,7 +145,7 @@ series.rwl.plot <-
     text(-1, 0.5, txt2, pos=4)
     txt3 <- gettext("Detrended and Trimmed:", domain="R-dplR")
     text(-1, 0, txt3, pos=4)
-    txt4 <- gettextf("%d-%d", min(yrs), max(yrs), domain="R-dplR")
+    txt4 <- gettextf("%d-%d", min.yrs, max(yrs), domain="R-dplR")
     text(-1, -0.5, txt4, pos=4)
     txt5 <- gettext("Detrending Options:", domain="R-dplR")
     text(-1, -1, txt5, pos=4)
