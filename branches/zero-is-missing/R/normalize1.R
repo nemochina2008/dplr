@@ -14,7 +14,7 @@ normalize1 <- function(rwl, n, prewhiten) {
         ## take note of, ignore later, any columns without at least
         ## four observations
         idx.good <- colSums(!is.na(master.mat)) > 3
-        master.mat <- apply(master.mat, 2, ar.func)
+        master.mat <- apply(master.mat, 2, function(x) ar.func(x)$y)
     } else {
         idx.good <- rep(TRUE, ncol(master.mat))
     }

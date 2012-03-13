@@ -20,7 +20,7 @@
         std <- apply(x2, 1, tbrm, C=9)
     }
     if (prewhiten) {
-        x.ar <- apply(x2, 2, ar.func)
+        x.ar <- apply(x2, 2, function(x) ar.func(x)$y)
         if (!biweight) {
             res <- rowMeans(x.ar, na.rm=TRUE)
         } else {
