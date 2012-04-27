@@ -31,11 +31,13 @@ combine.rwl <- function(x, y = NULL) {
     if (is.list(x)) {
         n <- length(x)
         if (n > 0 && all(vapply(x, is.data.frame, TRUE))) {
-            new.mat <- as.matrix(x[[1]])
-            for (i in inc(2, n))
-                new.mat <- combinator(new.mat, as.matrix(x[[i]]))
+            new.mat <- complete.rwl.df(x[[1]], TRUE)
+            for (i in inc(2, n)) {
+                new.mat <- combinator(new.mat, complete.rwl.df(x[[i]], TRUE))
+            }
         } else if (is.data.frame(x) && is.data.frame(y)) {
-            new.mat <- combinator(as.matrix(x), as.matrix(y))
+            new.mat <- combinator(complete.rwl.df(x, TRUE),
+                                  complete.rwl.df(y, TRUE))
         } else {
             stop("Nothing to combine here. Please supply data.frames formatted according to the data standards in dplR.")
         }
