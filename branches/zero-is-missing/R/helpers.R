@@ -1,19 +1,33 @@
 ### Creates a rwl data.frame with consecutive years
-complete.rwl.df <- function(rwl) {
+complete.rwl.df <- function(rwl, as.mat=FALSE) {
     cnames <- names(rwl)
-    yrs <- as.numeric(row.names(rwl))
+    rwl.mat <- as.matrix(rwl)
+    rnames <- rownames(rwl.mat)
+    if (is.null(rnames)) {
+        stop("automatic names found in 'rwl', must be explicit years")
+    }
+    yrs <- as.numeric(rnames)
+    if (any(is.na(yrs))) {
+        stop("non-numeric row name found in 'rwl'")
+    }
+    if (any(yrs != round(yrs))) {
+        stop("row names of 'rwl' must represent integral-valued numbers")
+    }
     min.yr <- min(yrs)
     max.yr <- max(yrs)
-    yrs <- min.yr : max.yr
+    yrs2 <- min.yr : max.yr
     rwl2 <- matrix(NA_real_,
                    nrow = max.yr - min.yr + 1,
                    ncol = length(rwl),
-                   dimnames = list(as.character(yrs), cnames))
-    rwl.tmp <- as.matrix(rwl)
-    for (rname in row.names(rwl)) {
-        rwl2[rname, ] <- rwl.tmp[rname, ]
+                   dimnames = list(as.character(yrs2), cnames))
+    for (rname in rnames) {
+        rwl2[rname, ] <- rwl.mat[rname, ]
     }
-    as.data.frame(rwl2)
+    if (as.mat) {
+        rwl2
+    } else {
+        as.data.frame(rwl2)
+    }
 }
 
 ### Creates a series (vector) with consecutive years.
@@ -135,7 +149,7 @@ levDurb <- function(acov) {
 ### The results should agree with those obtained by using standard ar.yw()
 ### in a non-NA case.
 ar.func <- function(x, pass.na=TRUE, lag.max=NULL) {
-    if (pass.na) {
+    if (identical(pass.na, TRUE)) {
         na.act <- na.pass
     } else {
         na.act <- na.fail
