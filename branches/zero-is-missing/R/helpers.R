@@ -356,7 +356,7 @@ compose.name <- function(orig.name, alphabet, idx, limit) {
         if (is.null(limit)) {
             new.name <- paste0(orig.name, last.part)
         } else {
-            new.name <- paste0(strtrim(orig.name,limit-idx.length),
+            new.name <- paste0(strtrim(orig.name, limit - idx.length),
                                last.part)
         }
     }
