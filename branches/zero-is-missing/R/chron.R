@@ -10,6 +10,7 @@
         stop("'prefix' must be a character string with less than 4 characters")
     }
     x2 <- complete.rwl.df(x, TRUE)
+    names.unique <- colnames(x2)
     n.cores <- length(x)
     if (is.null(ids)) {
         ids2 <- data.frame(tree=seq_along(x), core=rep(1, n.cores))
@@ -38,6 +39,7 @@
             ## If more than one columns of 'x' share a tree/core ID pair,
             ## the columns are averaged (robustly) and treated as one core
             x.temp <- matrix(NA_real_, nrow(x2), n.unique)
+            names.temp <- character(n.unique)
             for (i in seq_len(n.unique)) {
                 these.cols <- row.match(ids2, unique.ids[i, ])
                 if (biweight) {
@@ -47,9 +49,12 @@
                     x.temp[, i] <-
                         rowMeans(x2[, these.cols, drop=FALSE], na.rm=TRUE)
                 }
+                names.temp[i] <-
+                    paste0(names.unique[these.cols], collapse=";")
             }
             ids2 <- unique.ids
             x2 <- x.temp
+            names.unique <- names.temp
             message("Series with matching tree/core IDs have been averaged")
             message("Each unique tree/core ID pair adds 1 to sampling depth")
         }
@@ -57,7 +62,10 @@
     tree.freq <- table(ids2$tree)
     samps <- rowSums(!is.na(x2))
     if (prewhiten) {
-        x.ar <- apply(x2, 2, function(x) ar.func(x)$y)
+        ar.tmp <- apply(x2, 2, ar.func)
+        x.ar <- vapply(ar.tmp, function(x) x$y, numeric(nrow(x2)))
+        ar.order <- vapply(ar.tmp, function(x) x$order, 0)
+        names(ar.order) <- names.unique
         samps.res <- rowSums(!is.na(x.ar))
     }
     if (any(tree.freq != tree.freq[1]) || (biweight && any(tree.freq != 1))) {
@@ -114,9 +122,9 @@
     }
     if (prewhiten) {
         out <- data.frame(std, res, samps, samps.res)
-        ## TODO: Return order of AR model
         names(out) <- c(paste0(prefix.str, "std"), paste0(prefix.str, "res"),
                         "samp.depth", "samp.res")
+        attr(out, "ar.order") <- ar.order
     } else {
         out <- data.frame(std, samps)
         names(out) <- c(paste0(prefix.str, "std"), "samp.depth")
