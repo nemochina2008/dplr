@@ -65,8 +65,13 @@
         ar.tmp <- apply(x2, 2, ar.func)
         x.ar <- vapply(ar.tmp, function(x) x$y, numeric(nrow(x2)))
         ar.order <- vapply(ar.tmp, function(x) x$order, 0)
+        orig.na <- apply(is.na(x), 2, sum)
+        isna.xar <- is.na(x.ar)
+        ar.na <- apply(isna.xar, 2, sum)
+        n.orig <- nrow(x2) - orig.na
+        n.ar <- nrow(x2) - ar.na
+        samps.res <- rowSums(!isna.xar)
         names(ar.order) <- names.unique
-        samps.res <- rowSums(!is.na(x.ar))
     }
     if (any(tree.freq != tree.freq[1]) || (biweight && any(tree.freq != 1))) {
         unique.trees <- as.numeric(names(tree.freq))
@@ -124,7 +129,8 @@
         out <- data.frame(std, res, samps, samps.res)
         names(out) <- c(paste0(prefix.str, "std"), paste0(prefix.str, "res"),
                         "samp.depth", "samp.res")
-        attr(out, "ar.order") <- ar.order
+        attr(out, "ar.stats") <-
+            data.frame(order=ar.order, n.ar=n.ar, n.orig=n.orig)
     } else {
         out <- data.frame(std, samps)
         names(out) <- c(paste0(prefix.str, "std"), "samp.depth")
