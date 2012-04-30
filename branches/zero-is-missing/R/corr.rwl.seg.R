@@ -92,15 +92,15 @@ corr.rwl.seg <- function(rwl, seg.length=50, bin.floor=100, n=NULL,
     nbins <- nrow(bins)
     bin.names <- paste0(bins[, 1], ".", bins[, 2])
     ## structures for results
-    res.cor <- matrix(NA, nseries, nbins)
+    res.cor <- matrix(NA_real_, nseries, nbins)
     rownames(res.cor) <- cnames
     colnames(res.cor) <- bin.names
 
-    res.pval <- matrix(NA, nseries, nbins)
+    res.pval <- matrix(NA_real_, nseries, nbins)
     rownames(res.pval) <- cnames
     colnames(res.pval) <- bin.names
 
-    overall.cor <- matrix(NA, nseries, 2)
+    overall.cor <- matrix(NA_real_, nseries, 2)
     rownames(overall.cor) <- cnames
     colnames(overall.cor) <- c("rho", "p-val")
 
@@ -138,8 +138,8 @@ corr.rwl.seg <- function(rwl, seg.length=50, bin.floor=100, n=NULL,
             if (!any(mask) ||
                 any(is.na(series[mask])) ||
                 any(is.na(master2[mask]))) {
-                bin.cor <- NA
-                bin.pval <- NA
+                bin.cor <- NA_real_
+                bin.pval <- NA_real_
             } else {
                 tmp <- cor.test(series[mask], master2[mask],
                                 method = "spearman", alternative = "greater")
@@ -150,8 +150,11 @@ corr.rwl.seg <- function(rwl, seg.length=50, bin.floor=100, n=NULL,
             res.pval[i, j] <- bin.pval
         }
         ## overall correlation
-        tmp <- cor.test(series, master2,
-                        method = "spearman", alternative = "greater")
+        tmp <- tryCatch(cor.test(series, master2,
+                                 method = "spearman", alternative = "greater"),
+                        error = function(...) {
+                            list(estimate=NA_real_, p.val=NA_real_)
+                        })
         overall.cor[i, 1] <- tmp$estimate
         overall.cor[i, 2] <- tmp$p.val
     }
@@ -204,8 +207,8 @@ corr.rwl.seg <- function(rwl, seg.length=50, bin.floor=100, n=NULL,
         for (odd.even in c(1, 2)) {
             this.seq <- seq(from=odd.even, to=nbins, by=2)
             these.bins <- bins[this.seq, , drop=FALSE]
-            com.segs <- matrix(NA, ncol=nseries, nrow=nyrs)
-            flag.segs <- matrix(NA, ncol=nseries, nrow=nyrs)
+            com.segs <- matrix(NA_real_, ncol=nseries, nrow=nyrs)
+            flag.segs <- matrix(NA_real_, ncol=nseries, nrow=nyrs)
             ## loop through these.bins
             tmp <- res.pval[neworder, this.seq, drop=FALSE] > pcrit
             for (i in seq_len(nseries)) {
