@@ -1,10 +1,11 @@
 `chron` <-
-    function(x, prefix="xxx", biweight=TRUE, prewhiten=FALSE, ids=NULL)
+    function(x, prefix="xxx", biweight=TRUE, prewhiten=FALSE, ids=NULL,
+             x.out = FALSE)
 {
     if(!is.data.frame(x)) {
         stop("'x' must be a data.frame")
     }
-    check.flags(prewhiten, biweight)
+    check.flags(prewhiten, biweight, x.out)
     prefix.str <- as.character(prefix)
     if (length(prefix.str) != 1 || nchar(prefix.str) > 3) {
         stop("'prefix' must be a character string with less than 4 characters")
@@ -131,10 +132,20 @@
                         "samp.depth", "samp.res")
         attr(out, "ar.stats") <-
             data.frame(order=ar.order, n.ar=n.ar, n.orig=n.orig)
+        row.names(out) <- rownames(x2)
+        if (x.out) {
+            list(chron=out, x.std=x2, x.res=x.ar)
+        } else {
+            out
+        }
     } else {
         out <- data.frame(std, samps)
         names(out) <- c(paste0(prefix.str, "std"), "samp.depth")
+        row.names(out) <- rownames(x2)
+        if (x.out) {
+            list(chron=out, x.std=x2)
+        } else {
+            out
+        }
     }
-    row.names(out) <- rownames(x2)
-    out
 }
