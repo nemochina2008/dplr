@@ -2,6 +2,13 @@
 complete.rwl.df <- function(rwl, as.mat=FALSE) {
     cnames <- names(rwl)
     rwl.mat <- as.matrix(rwl)
+    if (nrow(rwl.mat) == 0) {
+        if (as.mat) {
+            return(rwl.mat)
+        } else {
+            return(rwl)
+        }
+    }
     rnames <- rownames(rwl.mat)
     if (is.null(rnames)) {
         stop("automatic names found in 'rwl', must be explicit years")
