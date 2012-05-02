@@ -11,7 +11,8 @@
         stop("'prefix' must be a character string with less than 4 characters")
     }
     x2 <- complete.rwl.df(x, TRUE)
-    names.unique <- colnames(x2)
+    rnames <- rownames(x2)
+    cnames <- colnames(x2)
     n.cores <- length(x)
     if (is.null(ids)) {
         ids2 <- data.frame(tree=seq_along(x), core=rep(1, n.cores))
@@ -22,12 +23,11 @@
         if (!all(vapply(ids, is.numeric, TRUE))) {
             stop("'ids' must have numeric columns")
         }
-        colnames.x <- names(x)
         ## If all column names in 'x' are present in the set of row
         ## names in 'ids', arrange 'ids' to matching order
         rownames.ids <- row.names(ids)
-        if (!is.null(rownames.ids) && all(colnames.x %in% rownames.ids)) {
-            ids2 <- ids[colnames.x, c("tree", "core")]
+        if (!is.null(rownames.ids) && all(cnames %in% rownames.ids)) {
+            ids2 <- ids[cnames, c("tree", "core")]
         } else if (nrow(ids) == n.cores) {
             ids2 <- ids[c("tree", "core")]
         } else {
@@ -51,28 +51,32 @@
                         rowMeans(x2[, these.cols, drop=FALSE], na.rm=TRUE)
                 }
                 names.temp[i] <-
-                    paste0(names.unique[these.cols], collapse=";")
+                    paste0(cnames[these.cols], collapse=";")
             }
             ids2 <- unique.ids
+            cnames <- names.temp
             x2 <- x.temp
-            names.unique <- names.temp
+            rownames(x2) <- rnames
+            colnames(x2) <- cnames
             message("Series with matching tree/core IDs have been averaged")
             message("Each unique tree/core ID pair adds 1 to sampling depth")
         }
     }
     tree.freq <- table(ids2$tree)
     samps <- rowSums(!is.na(x2))
+    orig.na <- apply(is.na(x2), 2, sum)
+    n.orig <- nrow(x2) - orig.na
     if (prewhiten) {
         ar.tmp <- apply(x2, 2, ar.func)
         x.ar <- vapply(ar.tmp, function(x) x$y, numeric(nrow(x2)))
+        rownames(x.ar) <- rnames
+        colnames(x.ar) <- cnames
         ar.order <- vapply(ar.tmp, function(x) x$order, 0)
-        orig.na <- apply(is.na(x), 2, sum)
         isna.xar <- is.na(x.ar)
         ar.na <- apply(isna.xar, 2, sum)
-        n.orig <- nrow(x2) - orig.na
         n.ar <- nrow(x2) - ar.na
         samps.res <- rowSums(!isna.xar)
-        names(ar.order) <- names.unique
+        names(ar.order) <- cnames
     }
     if (any(tree.freq != tree.freq[1]) || (biweight && any(tree.freq != 1))) {
         unique.trees <- as.numeric(names(tree.freq))
@@ -130,9 +134,9 @@
         out <- data.frame(std, res, samps, samps.res)
         names(out) <- c(paste0(prefix.str, "std"), paste0(prefix.str, "res"),
                         "samp.depth", "samp.res")
-        attr(out, "ar.stats") <-
-            data.frame(order=ar.order, n.ar=n.ar, n.orig=n.orig)
-        row.names(out) <- rownames(x2)
+        attr(out, "stats") <-
+            data.frame(order=ar.order, n.std=n.orig, n.res=n.ar)
+        row.names(out) <- rnames
         if (x.out) {
             list(chron=out, x.std=x2, x.res=x.ar)
         } else {
@@ -141,7 +145,8 @@
     } else {
         out <- data.frame(std, samps)
         names(out) <- c(paste0(prefix.str, "std"), "samp.depth")
-        row.names(out) <- rownames(x2)
+        attr(out, "stats") <- data.frame(n.std=n.orig)
+        row.names(out) <- rnames
         if (x.out) {
             list(chron=out, x.std=x2)
         } else {
