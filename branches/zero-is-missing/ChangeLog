@@ -18,6 +18,13 @@ File: skel.plot.R
   origin: originally in the data, due to processing, or due to
   thresholding.
 
+* CHANGES IN dplR VERSION 1.5.5
+
+File: corr.rwl.seg.R
+--------------------
+
+- Fixed 'ylim' in plot()
+
 * CHANGES IN dplR VERSION 1.5.4
 
 File: DESCRIPTION
