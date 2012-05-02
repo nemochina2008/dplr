@@ -48,6 +48,7 @@
                             }
                         },
                         numeric(2))
+    the.range <- as.matrix(the.range)
     series.stats$first <- the.range[1, ]
     series.stats$last <- the.range[2, ]
     series.stats$year <- series.stats$last - series.stats$first + 1

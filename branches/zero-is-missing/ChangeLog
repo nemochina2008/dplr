@@ -10,6 +10,11 @@ Various .R files
   change.
 - Many (not all) functions have been updated to handle NA data.
 
+File: detrend.R
+---------------
+
+- Support for input of length 1
+
 File: skel.plot.R
 -----------------
 
@@ -20,11 +25,21 @@ File: skel.plot.R
 
 * CHANGES IN dplR VERSION 1.5.5
 
+Files: corr.rwl.seg.R, seg.plot.R, rwl.stats.R, spag.plot.R
+-----------------------------------------------------------
+
+- Support for input of length 1
+
 File: corr.rwl.seg.R
 --------------------
 
 - Fixed 'ylim' in plot()
 - Fixed "no guides" case
+
+File: rcs.R
+-----------
+
+- Graceful handling of empty input
 
 * CHANGES IN dplR VERSION 1.5.4
 

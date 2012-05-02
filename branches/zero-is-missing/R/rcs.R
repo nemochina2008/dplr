@@ -4,6 +4,9 @@ rcs <- function(rwl, po, nyrs=NULL, f=0.5, biweight=TRUE, ratios=TRUE,
         stop("'rwl' must be a data.frame")
     }
     n.col <- ncol(rwl)
+    if (n.col == 0) {
+        return(rwl)
+    }
     if (n.col != nrow(po)) {
         stop("dimension problem: ", "'ncol(rw)' != 'nrow(po)'")
     }

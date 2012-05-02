@@ -5,7 +5,7 @@
         stop("'rwl' must be a data.frame")
     }
     yr <- as.numeric(row.names(rwl))
-    first.year <- apply(rwl, 2, yr.range, yr.vec=yr)[1, ]
+    first.year <- as.matrix(apply(rwl, 2, yr.range, yr.vec=yr))[1, ]
     neworder <- order(first.year, decreasing=FALSE)
     segs <- rwl[, neworder, drop=FALSE]
     n.col <- ncol(segs)

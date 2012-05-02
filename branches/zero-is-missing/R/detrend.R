@@ -12,6 +12,9 @@
         stop("'rwl' must be a data.frame")
     }
     rn <- row.names(rwl)
+    if (length(method2) == 1 && length(rwl) == 0) {
+        return(rwl)
+    }
 
     args <- list(...)
     args[["method"]] <- method2
