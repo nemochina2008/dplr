@@ -24,7 +24,7 @@ complete.rwl.df <- function(rwl, as.mat=FALSE) {
     min.yr <- min(yrs)
     max.yr <- max(yrs)
     n.full <- max.yr - min.yr + 1
-    if (n.rows == n.full) {
+    if (n.rows == n.full && all(diff(yrs) == 1)) {
         if (as.mat) {
             rwl.mat
         } else {
