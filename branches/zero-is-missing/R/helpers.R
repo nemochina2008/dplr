@@ -163,6 +163,7 @@ ar.func <- function(x, pass.na=TRUE, lag.max=NULL) {
     }
     idx.good <- which(!is.na(x))
     n.good <- length(idx.good)
+    y <- x
 
     if (n.good > 0) {
         idx.seq <- idx.good[1]:idx.good[n.good]
@@ -256,7 +257,6 @@ ar.func <- function(x, pass.na=TRUE, lag.max=NULL) {
 
         if (chosen.order > 0) {
             ar <- ARproc$coeffs[[chosen.order]]
-            y <- rep(NA_real_, length(x))
             resid.plus.mean <-
                 x.used - c(rep(NA_real_, chosen.order),
                            drop(embed(x.demeaned[-n.used],
@@ -271,19 +271,18 @@ ar.func <- function(x, pass.na=TRUE, lag.max=NULL) {
         }
         if (chosen.order > 0) {
             y[idx.seq] <- resid.plus.mean
+            names(y) <- names(x)
             var.pred <- var.temp[chosen.order + 1] * n.good /
                 (sum(!is.na(resid.plus.mean)) - 1)
         } else {
             ar <- numeric(0)
             var.pred <- var(x.used, na.rm=TRUE)
-            y <- x
         }
         if (order.max < 0) {
             chosen.order <- NA_real_
             order.max <- NA_real_
         }
     } else {
-        y <- x
         chosen.order <- NA_real_
         order.max <- NA_real_
         var.pred <- NA_real_
