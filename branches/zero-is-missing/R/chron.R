@@ -78,6 +78,14 @@
         samps.res <- rowSums(!isna.xar)
         names(ar.order) <- cnames
     }
+
+    ## Series prior to within-tree averaging,
+    ## except that series with shared IDs have been averaged
+    x2.pre <- x2
+    if (prewhiten) {
+        x.ar.pre <- x.ar
+    }
+
     if (any(tree.freq != tree.freq[1]) || (biweight && any(tree.freq != 1))) {
         unique.trees <- as.numeric(names(tree.freq))
         n.unique <- length(unique.trees)
@@ -112,8 +120,10 @@
             }
         }
         x2 <- x.temp
+        rownames(x2) <- rnames
         if (prewhiten) {
             x.ar <- x.ar.temp
+            rownames(x.ar) <- rnames
         }
     }
     ## (Robust) mean of means
@@ -138,7 +148,7 @@
             data.frame(order=ar.order, n.std=n.orig, n.res=n.ar)
         row.names(out) <- rnames
         if (x.out) {
-            list(chron=out, x.std=x2, x.res=x.ar)
+            list(chron=out, x.std=x2.pre, x.res=x.ar.pre)
         } else {
             out
         }
@@ -148,7 +158,7 @@
         attr(out, "stats") <- data.frame(n.std=n.orig)
         row.names(out) <- rnames
         if (x.out) {
-            list(chron=out, x.std=x2)
+            list(chron=out, x.std=x2.pre)
         } else {
             out
         }
