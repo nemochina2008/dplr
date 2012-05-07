@@ -2,7 +2,8 @@
 complete.rwl.df <- function(rwl, as.mat=FALSE) {
     cnames <- names(rwl)
     rwl.mat <- as.matrix(rwl)
-    if (nrow(rwl.mat) == 0) {
+    n.rows <- nrow(rwl.mat)
+    if (n.rows == 0) {
         if (as.mat) {
             return(rwl.mat)
         } else {
@@ -22,18 +23,27 @@ complete.rwl.df <- function(rwl, as.mat=FALSE) {
     }
     min.yr <- min(yrs)
     max.yr <- max(yrs)
-    yrs2 <- min.yr : max.yr
-    rwl2 <- matrix(NA_real_,
-                   nrow = max.yr - min.yr + 1,
-                   ncol = length(rwl),
-                   dimnames = list(as.character(yrs2), cnames))
-    for (rname in rnames) {
-        rwl2[rname, ] <- rwl.mat[rname, ]
-    }
-    if (as.mat) {
-        rwl2
+    n.full <- max.yr - min.yr + 1
+    if (n.rows == n.full) {
+        if (as.mat) {
+            rwl.mat
+        } else {
+            rwl
+        }
     } else {
-        as.data.frame(rwl2)
+        yrs2 <- min.yr : max.yr
+        rwl2 <- matrix(NA_real_,
+                       nrow = n.full,
+                       ncol = length(rwl),
+                       dimnames = list(as.character(yrs2), cnames))
+        for (rname in rnames) {
+            rwl2[rname, ] <- rwl.mat[rname, ]
+        }
+        if (as.mat) {
+            rwl2
+        } else {
+            as.data.frame(rwl2)
+        }
     }
 }
 
