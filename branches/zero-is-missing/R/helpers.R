@@ -1,4 +1,5 @@
-### Creates a rwl data.frame with consecutive years
+### Creates a rwl data.frame with consecutive years,
+### trims away leading and trailing all-NA rows
 complete.rwl.df <- function(rwl, as.mat=FALSE) {
     cnames <- names(rwl)
     rwl.mat <- as.matrix(rwl)
@@ -21,17 +22,33 @@ complete.rwl.df <- function(rwl, as.mat=FALSE) {
     if (any(yrs != round(yrs))) {
         stop("row names of 'rwl' must represent integral-valued numbers")
     }
+    have.data <- rowSums(!is.na(rwl.mat)) > 0
+    n.have.data <- sum(have.data)
+    all.have.data <- n.have.data == n.rows
+
     min.yr <- min(yrs)
     max.yr <- max(yrs)
     n.full <- max.yr - min.yr + 1
-    if (n.rows == n.full && all(diff(yrs) == 1)) {
+    if (all.have.data && n.rows == n.full && all(diff(yrs) == 1)) {
         if (as.mat) {
             rwl.mat
         } else {
             rwl
         }
     } else {
-        yrs2 <- min.yr : max.yr
+        if (all.have.data) {
+            yrs2 <- min.yr : max.yr
+        } else {
+            if (n.have.data == 0) {
+                yrs2 <- character(0)
+                n.full <- 0
+            } else {
+                yrs.tmp <- yrs[have.data]
+                yrs2 <- min(yrs.tmp):max(yrs.tmp)
+                n.full <- length(yrs2)
+            }
+            rnames <- rnames[have.data]
+        }
         rwl2 <- matrix(NA_real_,
                        nrow = n.full,
                        ncol = length(rwl),
