@@ -1,3 +1,23 @@
+### Trim away leading and trailing rows that only consist of NAs / NaNs
+### (optionally zeros)
+trim.rwl.df <- function(rwl, zero.is.na=TRUE) {
+    n.rows <- nrow(rwl)
+    if (n.rows == 0) {
+        return(rwl)
+    }
+    if (zero.is.na) {
+        have.data <- which(rowSums(!(is.na(rwl) | rwl == 0)) > 0)
+    } else {
+        have.data <- which(rowSums(!is.na(rwl)) > 0)
+    }
+    n.have.data <- length(have.data)
+    if (n.have.data == 0) {
+        rwl[integer(0), ]
+    } else {
+        rwl[have.data[1]:have.data[n.have.data], ]
+    }
+}
+
 ### Creates a rwl data.frame with consecutive years
 complete.rwl.df <- function(rwl, as.mat=FALSE) {
     cnames <- names(rwl)
