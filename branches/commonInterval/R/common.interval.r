@@ -108,6 +108,11 @@ common.interval <- function(rwl, type=c("maximum", "optimum", "common"),
         }
     }
 
+    ## Notes from Mikko:
+    ## - If we have a span of 1 year (very hypothetical...), should
+    ##   the corresponding line segment have a non-zero length? I
+    ##   think it would be zero with the present code. An instance of
+    ##   a classic problem...
     if (make.plot) {
         ## original rwl
         yr <- as.numeric(row.names(rwl.orig))
