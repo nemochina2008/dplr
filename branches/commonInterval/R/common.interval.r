@@ -28,8 +28,10 @@ optimum.interval <- function(rwl) {
         ## - Is this really what we want? (i.e. remove columns with NAs)
         ## - Why such a complicated expression on the first line? It
         ##   seems that there is no need to call mean().
-        rwl.common <- rwl.common[!is.na(apply(rwl.common, 2, mean, na.rm=TRUE))]
-        rwl.common <- as.data.frame(t(na.omit(t(rwl.common))))
+        ##FC yes you are completly right
+	##FC rwl.common <- rwl.common[!is.na(apply(rwl.common, 2, mean, na.rm=TRUE))]
+        ##FC rwl.common <- as.data.frame(t(na.omit(t(rwl.common))))
+	rwl.common <- rwl.common[, !apply(rwl.common,2, function(x) any(is.na(x))] ##FC
         opt <- ncol(rwl.common) * nrow(rwl.common)
         if (opt > output) {
             output <- opt
