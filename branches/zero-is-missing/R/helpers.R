@@ -22,7 +22,7 @@ trim.rwl.df <- function(rwl, zero.is.na=TRUE) {
 
 ### Creates a rwl data.frame with consecutive years
 complete.rwl.df <- function(rwl, as.mat=FALSE) {
-    if (!all(vapply(rwl, is.vector, TRUE, mode="integer"))) {
+    if (!all(vapply(rwl, is.vector, TRUE, mode="numeric"))) {
         stop("'rwl' must not have columns containing a matrix")
     }
     cnames <- names(rwl)
