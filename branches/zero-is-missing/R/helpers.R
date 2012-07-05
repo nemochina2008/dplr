@@ -1,9 +1,11 @@
 ### Trim away leading and trailing rows that only consist of NAs / NaNs
 ### (optionally zeros)
 trim.rwl.df <- function(rwl, zero.is.na=TRUE) {
-    n.rows <- nrow(rwl)
-    if (n.rows == 0) {
+    if (nrow(rwl) == 0) {
         return(rwl)
+    }
+    if (ncol(rwl) == 0) {
+        return(rwl[integer(0), ])
     }
     if (zero.is.na) {
         have.data <- which(rowSums(!(is.na(rwl) | rwl == 0)) > 0)
@@ -20,6 +22,9 @@ trim.rwl.df <- function(rwl, zero.is.na=TRUE) {
 
 ### Creates a rwl data.frame with consecutive years
 complete.rwl.df <- function(rwl, as.mat=FALSE) {
+    if (!all(vapply(rwl, is.vector, TRUE, mode="integer"))) {
+        stop("'rwl' must not have columns containing a matrix")
+    }
     cnames <- names(rwl)
     rwl.mat <- as.matrix(rwl)
     n.rows <- nrow(rwl.mat)
