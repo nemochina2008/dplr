@@ -72,14 +72,14 @@ rcs(rwl, po, nyrs = NULL, f = 0.5, biweight = TRUE, ratios = TRUE,
 \references{
   Biondi, F. and Qeadan, F. (2008) A theory-driven approach to tree-ring
   standardization: Defining the biological trend from expected basal
-  area increment.  \emph{Tree-Ring Research}, 64(2):81--96.
+  area increment.  \emph{Tree-Ring Research}, 64(2):81\enc{–}{--}96.
 
   Cook, E. R. and Kairiukstis, L. A. (1990) \emph{Methods of
   Dendrochronology: Applications in the Environmental Sciences}.
-  Springer.  \acronym{ISBN-13}: 978-0792305866.
+  Springer.  \acronym{ISBN-13}: 978-0-7923-0586-6.
 
   Fritts, H. C. (2001) \emph{Tree Rings and Climate}.
-  Blackburn.  \acronym{ISBN-13}: 978-1930665392.
+  Blackburn.  \acronym{ISBN-13}: 978-1-930665-39-2.
 }
 \note{ DendroLab website: \url{http://dendrolab.org/} }
 \author{

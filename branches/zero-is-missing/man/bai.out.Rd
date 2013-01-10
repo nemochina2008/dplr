@@ -6,11 +6,28 @@
 
 }
 \usage{
-bai.out(rwl, diam = NULL)
+bai.out(rwl, diam = NULL, warn.na = TRUE)
 }
 \arguments{
-  \item{rwl}{ a \code{data.frame} with series as columns and years as rows such as that produced by \code{\link{read.rwl}} }
-  \item{diam}{ an optional \code{data.frame} containing two variables.  If present, variable one (\code{\var{series}} in the example below) gives the series \acronym{ID} as either \code{character}s or \code{factor}s.  These must exactly match \code{colnames(\var{rwl})}.  Variable two (\code{\var{diam}} in the example below) gives the diameter of the tree (in mm) up to the outermost ring (e.g., the diameter of the tree where the core was taken minus the thickness of the bark).  If \code{\var{diam}} is \code{NULL} then the diameter is taken as twice the sum of the widths for each series (column) in \code{\var{rwl}}. }
+  
+  \item{rwl}{ a \code{data.frame} with series as columns and years as
+    rows such as that produced by \code{\link{read.rwl}} }
+  
+  \item{diam}{ an optional \code{data.frame} containing two variables.
+    If present, variable one (\code{\var{series}} in the example below)
+    gives the series \acronym{ID} as either \code{character}s or
+    \code{factor}s.  These must exactly match \code{colnames(\var{rwl})}.
+    Variable two (\code{\var{diam}} in the example below) gives the
+    diameter of the tree (in mm) up to the outermost ring (e.g., the
+    diameter of the tree where the core was taken minus the thickness of
+    the bark).  If \code{\var{diam}} is \code{NULL} then the diameter is
+    taken as twice the sum of the widths for each series (column) in
+    \code{\var{rwl}}. }
+
+  \item{warn.na}{ a \code{logical} flag.  If \code{TRUE} (the default),
+    warns about \code{NA} values in the output, caused by \code{NA}
+    values in the input. }
+
 }
 \details{
 This converts ring-width series (mm) to ring-area series (mm squared) (aka basal area increments) based on the diameter of the tree and the width of each ring moving towards the pith of the tree.  It is related to \code{\link{bai.in}}, which calculates each ring area starting from the inside of the tree and working outward.  Both methods assume a circular cross section (Biondi 1999).  See the references below for further details. 
@@ -19,9 +36,9 @@ This converts ring-width series (mm) to ring-area series (mm squared) (aka basal
 \value{
   A \code{data.frame} containing the ring areas for each series with column names, row names and dimensions of \code{\var{rwl}}.
 }
-\references{ Biondi, F. (1999) Comparing tree-ring chronologies and repeated timber inventories as forest monitoring tools.  \emph{Ecological Applications}, 9(1):216--227.
+\references{ Biondi, F. (1999) Comparing tree-ring chronologies and repeated timber inventories as forest monitoring tools.  \emph{Ecological Applications}, 9(1):216\enc{–}{--}227.
 
-Biondi, F. and Qeadan, F. (2008) A theory-driven approach to tree-ring standardization: Defining the biological trend from expected basal area increment.  \emph{Tree-Ring Research}, 64(2):81--96.
+Biondi, F. and Qeadan, F. (2008) A theory-driven approach to tree-ring standardization: Defining the biological trend from expected basal area increment.  \emph{Tree-Ring Research}, 64(2):81\enc{–}{--}96.
 }
 \note{ DendroLab website: \url{http://dendrolab.org/} }
 \author{ Code by Andy Bunn based on work from DendroLab, University of

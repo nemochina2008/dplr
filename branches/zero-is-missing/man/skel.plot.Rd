@@ -6,7 +6,8 @@
 }
 \usage{
 skel.plot(rw.vec, yr.vec = NULL, sname = "", filt.weight = 9,
-          dat.out = FALSE, master = FALSE, plot = TRUE)
+          dat.out = FALSE, master = FALSE, plot = TRUE,
+          metadata.out = FALSE)
 }
 \arguments{
   \item{rw.vec}{ a \code{numeric} vector of a tree-ring chronology or
@@ -23,6 +24,10 @@ skel.plot(rw.vec, yr.vec = NULL, sname = "", filt.weight = 9,
     the segments will be plotted from the top down and the labels on the
     x axes will be on the bottom. }
   \item{plot}{ \code{logical} flag indicating whether to make a plot. }
+  \item{metadata.out}{ a \code{logical} flag.  If \code{TRUE}, the
+    function returns information about the origin of the \code{NA}
+    values in the output: already in the input, due to processing or due
+    to thresholding.  See \sQuote{Value}. }
 }
 \details{
   This makes a skeleton plot - a plot that gives the relative growth for
@@ -53,16 +58,26 @@ skel.plot(rw.vec, yr.vec = NULL, sname = "", filt.weight = 9,
 
 }
 \value{
+
   This function is invoked primarily for its side effect, which is to
   produce a plot. If \code{\var{dat.out}} is \code{TRUE} then a
-  \code{data.frame} is returned with the years and height of the
-  skeleton plot segments as columns.
+  \code{data.frame} is returned with the years (\code{"yr"}) and height
+  (\code{"skel"}) of the skeleton plot segments as columns.
+
+  If \code{\var{metadata.out}} is \code{TRUE}, three \code{logical}
+  columns are added to the output.  Column \code{"original.NA"}
+  indicates if the input value in question was \code{NA}.  Column
+  \code{"processing.NA"} tells if an \code{NA} value in \code{"skel"}
+  was caused by propagation of other \code{NA}s.  Column
+  \code{"threshold.NA"} points out \code{"skel"} values that were
+  originally finite but smaller than 3, and therefore set to \code{NA}.
+  
 }
 \references{
 
   Stokes, M. A. and Smiley, T. L. (1968) \emph{An Introduction to
     Tree-Ring Dating}.  The University of Arizona Press.
-  \acronym{ISBN-13}: 978-0816516803.
+  \acronym{ISBN-13}: 978-0-8165-1680-3.
   
   Sheppard, P. R. (2002) Crossdating Tree Rings Using Skeleton Plotting.
   \url{http://www.ltrr.arizona.edu/skeletonplot/introcrossdate.htm}

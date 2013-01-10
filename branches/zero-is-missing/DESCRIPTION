@@ -2,14 +2,17 @@ Encoding: UTF-8
 Package: dplR
 Type: Package
 Title: Dendrochronology Program Library in R
-Version: 1.5.5-0
-Date: 2012-07-05
+Version: 1.5.7-660
+Date: 2013-01-10
 Authors@R: c(person(c("Andrew", "G."), "Bunn", role = c("aut", "cph",
-        "cre", "trl"), email = "andy.bunn@wwu.edu"), person("Mikko",
+        "cre", "trl"), email = "andrew.bunn@wwu.edu"), person("Mikko",
         "Korpela", role = c("aut", "cph")), person("Franco", "Biondi",
-        role = c("aut", "cph")), person("Fares", "Qeadan", role =
-        c("aut", "cph")), person("Christian", "Zang", role = c("aut",
-        "cph")))
+        role = c("aut", "cph")), person("Filipe", "Campelo", role = 
+        c("aut", "cph")), person("Pierre", "Mérian", role = c("aut", 
+        "cph")), person("Fares", "Qeadan", role = c("aut", "cph")), 
+        person("Christian", "Zang", role = c("aut", "cph")))
+Author: Andy Bunn [aut, cph, cre, trl], Mikko Korpela [aut, cph], Franco Biondi [aut, cph], Filipe Campelo [aut, cph], Pierre Mérian [aut, cph], Fares Qeadan [aut, cph], Christian Zang [aut, cph]
+Maintainer: Andy Bunn <andy.bunn@wwu.edu>
 Depends: R (>= 2.15.0)
 Imports: graphics, grDevices, grid, Matrix (>= 0.9996875-1), stats, utils,
         digest (>= 0.2.3), lattice (>= 0.13-6), stringr (>= 0.4),

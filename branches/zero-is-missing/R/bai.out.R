@@ -29,15 +29,15 @@ bai.out <- function(rwl, diam = NULL, warn.na = TRUE) {
             first.good <- idx.good[1]
             last.good <- idx.good[n.good]
             idx.seq <- first.good:last.good
-            dat2 <- dat2[idx.seq]
+            dat <- dat[idx.seq]
             ## get diameter if not given
             if (is.null(diam)) {
-                d <- sum(dat2)*2
+                d <- sum(dat)*2
             } else {
                 d <- diam.vec[i]
             }
             ## get ring area
-            r0 <- d/2 - c(0, cumsum(rev(dat2)))
+            r0 <- d/2 - c(0, cumsum(rev(dat)))
             bai <- -pi*rev(diff(r0*r0))
             if (warn.na && any(is.na(bai))) {
                 warning(gettextf("NA values in series %s",

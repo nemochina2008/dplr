@@ -36,7 +36,7 @@
     } else {
         yr.vec2 <- yr.vec[notna.idx[1]:notna.idx[n.notna]]
     }
-    original.na <- is.na(rw.vec2)       # metadata
+    original.NA <- is.na(rw.vec2)       # metadata
     ## pad down to the nearest 10 if not already there
     min.yr <- min(yr.vec2)
     pad0 <- floor(min.yr / 10) * 10
@@ -57,8 +57,8 @@
     temp.diff <- diff(rw.vec2)
     skel[idx] <- rowMeans(cbind(temp.diff[-n.diff],
                                 -temp.diff[-1]), na.rm = FALSE) / rw.dt[idx]
-    processing.na <- is.na(skel)        # metadata
-    processing.na[original.na] <- FALSE
+    processing.NA <- is.na(skel)        # metadata
+    processing.NA[original.NA] <- FALSE
     skel[skel > 0] <- NA
     ## rescale from 0 to 10
     na.flag <- is.na(skel)
@@ -73,9 +73,9 @@
     skel <- newrange[1] + (skel - skel.range[1]) * mult.scalar
     skel[skel < 3] <- NA
     skel <- ceiling(skel)
-    threshold.na <- is.na(skel)         # metadata
-    threshold.na[original.na] <- FALSE
-    threshold.na[processing.na] <- FALSE
+    threshold.NA <- is.na(skel)         # metadata
+    threshold.NA[original.NA] <- FALSE
+    threshold.NA[processing.NA] <- FALSE
 
     ## Variables for plotting
     ## page width

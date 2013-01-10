@@ -25,15 +25,15 @@ License: \tab \acronym{GPL}\cr
 }
 \author{
   Andy Bunn \email{andy.bunn@wwu.edu} with major additions from Mikko
-  Korpela and other significant contributions from Franco Biondi, Fares
-  Qeadan and Christian Zang
+  Korpela and other significant contributions from Franco Biondi, Filipe
+  Campelo, Pierre \enc{Mérian}{Merian}, Fares Qeadan and Christian Zang
 }
 \references{
   Cook, E. R. and Kairiukstis, L. A. (1990) \emph{Methods of
   Dendrochronology: Applications in the Environmental Sciences.}
-  Springer.  \acronym{ISBN-13}: 978-0792305866.
+  Springer.  \acronym{ISBN-13}: 978-0-7923-0586-6.
 
   Fritts, H. C. (2001) \emph{Tree Rings and Climate.}
-  Blackburn.  \acronym{ISBN-13}: 978-1930665392.
+  Blackburn.  \acronym{ISBN-13}: 978-1-930665-39-2.
 }
 \keyword{ package }

@@ -7,17 +7,18 @@
   These functions calculate descriptive statistics on a
   \code{data.frame} of (usually) ring-width indices. The statistics are
   optionally computed in a running window with adjustable length and
-  overlap.
+  overlap. The data can be filtered so that the comparisons are made to
+  on just high-frequency data. 
 }
 \usage{
 rwi.stats.running(rwi, ids = NULL, period = c("max", "common"),
+                  prewhiten=FALSE,n=NULL,
                   running.window = TRUE,
                   window.length = min(50, nrow(rwi)),
                   window.overlap = floor(window.length / 2),
                   first.start = NULL,
                   min.corr.overlap = min(30, window.length),
-                  round.decimals = 3,
-                  zero.is.missing = TRUE)
+                  round.decimals = 3)
 
 rwi.stats(rwi, ids=NULL, period=c("max", "common"), \dots)
 
@@ -35,33 +36,32 @@ rwi.stats.legacy(rwi, ids=NULL, period=c("max", "common"))
     for each core. Defaults to one core per tree as
     \code{data.frame(tree = 1:ncol(\var{rwi}), core = rep(1,
       ncol(\var{rwi})))}. }
-
   \item{period}{ a \code{character} string, either \code{"common"} or
     \code{"max"} indicating whether correlations should be limited to
     complete observations over the period common to all cores (i.e. rows
     common to all samples) or the maximum pairwise overlap. Defaults
     to \code{"max"}. }
-
+  \item{n}{ \code{NULL} or an integral value giving the filter length
+    for the \code{\link{hanning}} filter used for removal of low
+    frequency variation. }
+  \item{prewhiten}{ \code{logical} flag.  If \code{TRUE} each series is
+    whitened using \code{\link{ar}}. }
   \item{running.window}{ \code{logical} flag indicating whether to use a
     running window (\code{TRUE}, the default) or to ignore the other
     window parameters and effectively use one window covering all years
     (\code{FALSE}). }
-
   \item{window.length}{ \code{numeric} value indicating the length of
     the running window in years. The default is 50 years or the number
     of years (rows) in \code{\var{rwi}}, whichever is smaller. }
-
   \item{window.overlap}{ \code{numeric} value indicating the overlap of
     consecutive window positions, i.e. the number of common years. The
     default is half of the window length, rounded down. }
-
   \item{first.start}{ an optional \code{numeric} value setting the
     position of the first window. Must be a value between \code{1} and
     \code{\var{n.years}-\var{window.length}+1}, where
     \code{\var{n.years}} is the number of years in \code{\var{rwi}}. The
     default value \code{NULL} lets the function make the decision using
     some heuristic rules. }
-
   \item{min.corr.overlap}{ \code{numeric} value setting the minimum
     number of common years in any pair of ring-width series required for
     their correlation to be included in the calculations. Smaller
@@ -69,15 +69,9 @@ rwi.stats.legacy(rwi, ids=NULL, period=c("max", "common"))
     are ignored. Defaults to the minimum of 30 and the length of the
     window. One way to lift the restriction and include all correlations
     is to set \code{\var{min.corr.overlap} = 0}. }
-
   \item{round.decimals}{ non-negative integer \code{numeric} value
     setting the desired number of decimal places in the results. Use
     \code{NA}, \code{NULL} or a negative number for no rounding. }
-
-  \item{zero.is.missing}{ \code{logical} flag indicating whether to
-    treat zeros as missing values (\code{TRUE}, the default) or to
-    include them in computation (\code{FALSE}).  }
-  
   \item{\dots}{ arguments passed on to \code{rwi.stats.running} }
 
 }
@@ -100,13 +94,8 @@ rwi.stats.legacy(rwi, ids=NULL, period=c("max", "common"))
 
   If \code{\var{ids}} has duplicate tree/core combinations, the
   corresponding series are averaged before any statistics are computed.
-  The value of the parameter \code{\var{zero.is.missing}} is relevant in
-  the averaging: \code{TRUE} ensures that zeros don't contribute to the
-  average.  The default value of \code{\var{zero.is.missing}} is
-  \code{TRUE}.  The default prior to dplR 1.5.3 was \code{FALSE}. If the
-  parameter is set to \code{FALSE}, the user will be warned in case
-  zeros are present.  Duplicate tree/core combinations are not detected
-  by \code{rwi.stats.legacy}.
+  Duplicate tree/core combinations are not detected by
+  \code{rwi.stats.legacy}.
 
   Row names of \code{\var{ids}} may be used for matching the
   \acronym{ID}s with series in \code{\var{rwi}}.  In this case, the
@@ -127,6 +116,12 @@ rwi.stats.legacy(rwi, ids=NULL, period=c("max", "common"))
   effective number of cores or the expressed population signal).  Users
   unfamiliar with these should see Cook and Kairiukstis (1990) and
   Fritts (2001) for further details.
+
+  If desired, the \code{\var{rwi}} can be filtered in the same manner
+  as the family of cross-dating functions using \code{\var{prewhiten}} and
+  \code{\var{n}}. See the help page for \code{\link{corr.rwl.seg}} for
+  more details.
+  
 
 }
 \value{ A \code{data.frame} containing the following columns (each row
@@ -175,10 +170,10 @@ rwi.stats.legacy(rwi, ids=NULL, period=c("max", "common"))
 
   Cook, E. R. and Kairiukstis, L. A. (1990) \emph{Methods of
     Dendrochronology: Applications in the Environmental Sciences}.
-  Springer.  \acronym{ISBN-13}: 978-0792305866.
+  Springer.  \acronym{ISBN-13}: 978-0-7923-0586-6.
 
   Fritts, H. C. (2001) \emph{Tree Rings and Climate}.  Blackburn.
-  \acronym{ISBN-13}: 978-1930665392.
+  \acronym{ISBN-13}: 978-1-930665-39-2.
   
 }
 \note{
@@ -190,7 +185,8 @@ rwi.stats.legacy(rwi, ids=NULL, period=c("max", "common"))
 \author{ Mikko Korpela, based on \code{\link{rwi.stats.legacy}} by Andy
   Bunn }
 \seealso{ \code{\link{detrend}}, \code{\link{cor}},
-  \code{\link{read.ids}}, \code{\link{rwi.stats}} }
+  \code{\link{read.ids}}, \code{\link{rwi.stats}},
+  \code{\link{corr.rwl.seg}}  } 
 \examples{data(ca533)
 ca533.rwi <- detrend(rwl = ca533, method = "Mean") # mean is fast
 ca533.ids <- read.ids(ca533, stc = c(3, 2, 3))

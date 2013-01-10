@@ -5,11 +5,13 @@ test.chron <- function() {
     ## Setup
     N <- 500
     srs1 <- pmax(rnorm(N, 1, 0.4), 0.1)
+    names(srs1) <- as.character(1:N)
     dat1 <- data.frame(srs1 - 0.05, srs1, srs1 + 0.05)
     res1.1 <- chron(dat1, prefix = "xxx", biweight = FALSE, prewhiten = TRUE)
     res1.2 <- chron(dat1, prefix = "xxx", biweight = TRUE, prewhiten = FALSE)
 
     srs2 <- 0.5 * sin(pi / 50 * seq_len(N)) + 1 # period is 100
+    names(srs2) <- as.character(1:N)
     sd2.1 <- sd(srs2)
     dat2 <- data.frame(srs2 - 0.1, srs2, srs2 + 0.1)
     res2 <- chron(dat2, prefix = "xxx", biweight = FALSE, prewhiten = TRUE)

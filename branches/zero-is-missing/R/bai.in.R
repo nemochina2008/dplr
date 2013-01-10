@@ -32,9 +32,9 @@ bai.in <- function(rwl, d2pith = NULL, warn.na = TRUE) {
             first.good <- idx.good[1]
             last.good <- idx.good[n.good]
             idx.seq <- first.good:last.good
-            dat2 <- dat2[idx.seq]
+            dat <- dat[idx.seq]
             ## get ring area
-            bai <- pi*dat2*(dat2+2*(cumsum(dat2) + d2pith.vec[i] - dat2))
+            bai <- pi*dat*(dat+2*(cumsum(dat) + d2pith.vec[i] - dat))
             if (warn.na && any(is.na(bai))) {
                 warning(gettextf("NA values in series %s",
                                  names(rwl2)[i]), domain=NA)

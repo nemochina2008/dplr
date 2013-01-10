@@ -38,15 +38,15 @@ tbrm(x, C = 9)
 
   Cook, E. R. and Kairiukstis, L. A. (1990) \emph{Methods of
   Dendrochronology: Applications in the Environmental Sciences}.
-  Springer.  \acronym{ISBN-13}: 978-0792305866.
+  Springer.  \acronym{ISBN-13}: 978-0-7923-0586-6.
 
   Mosteller, F. and Tukey, J. W. (1977) \emph{Data Analysis and
   Regression: a second course in statistics}.  Addison-Wesley.
-  \acronym{ISBN-13}: 978-0201048544.
+  \acronym{ISBN-13}: 978-0-201-04854-4.
 
   Shewchuk, J. R. (1997) Adaptive Precision Floating-Point Arithmetic
   and Fast Robust Geometric Predicates.  \emph{Discrete and
-  Computational Geometry}, 18(3):305--363. Springer.
+  Computational Geometry}, 18(3):305\enc{–}{--}363. Springer.
 
 }
 \author{ Mikko Korpela }

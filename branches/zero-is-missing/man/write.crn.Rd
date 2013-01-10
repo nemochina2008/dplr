@@ -80,7 +80,7 @@ ca533.rwi <- detrend(rwl = ca533, method = "ModNegExp")
 ca533.crn <- chron(ca533.rwi, prefix = "CAM")
 write.crn(ca533.crn, "tmp.crn")
 ## Put the standard and residual chronologies in a single file
-## with ITRDB header info on top. Not reccomended.
+## with ITRDB header info on top. Not recommended.
 ca533.crn <- chron(ca533.rwi, prefix = "CAM", prewhiten = TRUE)
 ca533.hdr <- list(site.id = "CAM", site.name = "Campito Mountain",
                   spp.code = "PILO", state.country = "California",
@@ -88,7 +88,7 @@ ca533.hdr <- list(site.id = "CAM", site.name = "Campito Mountain",
                   long = -11813, first.yr = 626, last.yr = 1983,
                   lead.invs = "Donald A. Graybill, V.C. LaMarche, Jr.",
                   comp.date = "Nov1983")
-write.crn(ca533.crn[, -2], "tmp.crn", header = ca533.hdr)
-write.crn(ca533.crn[, -1], "tmp.crn", append = TRUE)
+write.crn(ca533.crn[, c(1, 3)], "tmp.crn", header = ca533.hdr)
+write.crn(ca533.crn[, c(2, 4)], "tmp.crn", append = TRUE)
 }
 \keyword{ IO }

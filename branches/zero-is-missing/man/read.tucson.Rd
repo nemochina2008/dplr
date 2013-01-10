@@ -6,7 +6,7 @@
 }
 \usage{
 read.tucson(fname, header = NULL, long = FALSE,
-            encoding = getOption("encoding"))
+            encoding = getOption("encoding"), zero.as.na = TRUE)
 }
 \arguments{
   \item{fname}{ a \code{character} vector giving the file name of the
@@ -26,6 +26,9 @@ read.tucson(fname, header = NULL, long = FALSE,
     problem.  Examples of popular encodings available on many systems
     are \code{"ASCII"}, \code{"UTF-8"}, and \code{"latin1"} alias
     \code{"ISO-8859-1"}.  See the help of \code{\link{file}}. }
+  \item{zero.as.na}{ a \code{logical} flag.  If \code{TRUE} (the
+    default), zeros in the input are interpreted as missing values
+    (\code{NA}). }
 }
 \details{
   This reads in a standard rwl file as defined according to the

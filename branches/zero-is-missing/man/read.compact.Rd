@@ -6,11 +6,14 @@
   widths.
 }
 \usage{
-read.compact(fname)
+read.compact(fname, zero.as.na = TRUE)
 }
 \arguments{
   \item{fname}{ a \code{character} vector giving the file name of the
     rwl file. }
+  \item{zero.as.na}{ a \code{logical} flag.  If \code{TRUE} (the
+    default), zeros in the input are interpreted as missing values
+    (\code{NA}). }
 }
 \details{
   This function should be able to read files written by the

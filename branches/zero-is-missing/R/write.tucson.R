@@ -181,7 +181,7 @@
         ## Pad to name.width
         rwl.df.name <- ifelse(rwl.df.width < name.width,
                               format(rwl.df.name, width=name.width,
-                                     justify="right"),
+                                     justify="left"),
                               rwl.df.name)
 
         for (i in seq_len(n.decades)) {
@@ -232,7 +232,8 @@
                 if (i == n.decades) {
                     end.match[length(end.match)] <- FALSE
                 }
-                dec.rwl[end.match] <- 1000
+                dec.rwl[end.match] <-
+                    sample(c(998, 1000), sum(end.match), replace=TRUE)
             }
 
             ## Pad to nchar 6 (no leading zero)

@@ -7,8 +7,7 @@
 }
 \usage{
 detrend(rwl, y.name = names(rwl), make.plot = FALSE,
-        method = c("Spline", "ModNegExp", "Mean"), nyrs = NULL,
-        f = 0.5, pos.slope = FALSE)
+        method = c("Spline", "ModNegExp", "Mean"), \dots)
 }
 \arguments{
 
@@ -27,21 +26,12 @@ detrend(rwl, y.name = names(rwl), make.plot = FALSE,
     \code{c("Spline", "ModNegExp", "Mean")}. Defaults to using all the
     available methods.}
   
-  \item{nyrs}{ a number giving the rigidity of the smoothing spline,
-    defaults to 0.67 of series length if \code{\var{nyrs}} is
-    \code{NULL}. }
-  
-  \item{f}{ a number between 0 and 1 giving the frequency response or
-    wavelength cutoff. Defaults to 0.5. }
+  \item{\dots}{ arguments passed to \code{\link{detrend.series}} }
 
-  \item{pos.slope}{ a \code{logical} flag. Will allow for a positive
-    slope to be used in method \code{"ModNegExp"}. If \code{FALSE} the
-    line will be horizontal. }
-  
 }
 \details{
-  See \code{\link{detrend.series}} for details on detrending
-  methods. Setting \code{\var{make.plot} = TRUE} will cause plots of
+  See \code{\link{detrend.series}} for details on detrending methods and
+  arguments. Setting \code{\var{make.plot} = TRUE} will cause plots of
   each series to be produced. These could be saved using
   \code{\link{Devices}} if desired.
 }

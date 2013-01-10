@@ -1799,7 +1799,7 @@ read.tridas <- function(fname, ids.from.titles=FALSE,
                  end.element("stateProvinceRegion")
              },
              "/taxon" = function(...) {
-                 if (nchar(text.buffer) > 0) {
+                 if (nzchar(text.buffer)) {
                      taxon <<- text.buffer
                  }
                  end.element("taxon")
@@ -2179,7 +2179,7 @@ read.tridas <- function(fname, ids.from.titles=FALSE,
                  end.element("values")
              },
              "/variable" = function(...) {
-                 if (nchar(text.buffer) > 0) {
+                 if (nzchar(text.buffer)) {
                      variable <<- text.buffer
                  }
                  end.element("variable")
