@@ -1,0 +1,2305 @@
+* CHANGES IN dplR VERSION 1.5.9
+
+Files: dplR.h, rcompact.c, redfit.c
+-----------------------------------
+
+- Restructured header inclusions
+- dplR.h declares new function dplRlength (internal use)
+
+File: dplR.c
+------------
+
+- New file for general C functions internally used by dplR
+
+Files: exactmean.c, exactmean.R, gini.c, gini.coef.R,
+readloop.c, read.tucson.R, sens.c, sens1.R, sens2.R, tbrm.c, tbrm.R
+-------------------------------------------------------------------
+
+- Use .Call() instead of .C() for interfacing with C code
+- The C functions need less support (arguments, argument checking) from
+  the calling R function
+
+Files: exactsum.c, exactsum.h
+-----------------------------
+
+- Reuse of code between function by using the C preprocessor
+- New (internal to dplR C code) function cumsum (cumulative sum,
+  overwrites input array)
+- size_t n
+
+File: gini.c
+------------
+
+- Simplified expression for gini coefficent reduces number of
+  arithmetic operations performed
+- Fewer calls to other functions (use of the new cumulative sum function)
+
+File: readloop.c
+----------------
+
+- Fixed buggy handling of malformed Tucson format series that have
+  no data and no stop marker. Previously, this hypothetical case
+  could have caused a read from a location just outside the array
+  bounds. However, in most cases that would probably not have been a
+  problem.
+
+File: rwi.stats.running.R
+-------------------------
+
+- Bug fix: when using period = "common" in rwi.stats() or
+  rwi.stats.running(), the number of trees 'n' used in EPS and shown
+  in the return value is now the total number of trees in the
+  data.frame, taking into account the fact that rows with any
+  missing values are effectively dropped.  Thanks to Donald Zhao for
+  reporting.
+
+* CHANGES IN dplR VERSION 1.5.8
+
+File: tbrm.Rd
+---------------
+- Improved (slightly) the trbm() examples.
+
+Files: exactmean.R, gini.coef.R, sens1.R, sens2.R, tbrm.R
+---------------------------------------------------------
+
+- Changed calls to .C (where we use DUP = FALSE) so that the
+  binding of NaN will not change, fixing multiple instances of a bug
+  in dplR code revealed by changes in recent R development versions.
+  We were accidentally breaking CRAN's "malicious or anti-social"
+  policy. Thanks to Professor Brian D. Ripley for reporting.
+
+  Now R CMD check --as-cran passes fine.
+
+File: DESCRIPTION
+
+- Added Jacob Cecile as a contributor
+
+File: detrend.R
+---------------
+
+- Adjusted for the changes in detrend.series(),
+  i.e. added the argument constrain.modnegexp.
+
+File: detrend.series.R
+----------------------
+
+- Fixed a bug where RWI could go negative. Thanks to Jacob Cecile for
+  reporting the bug and contributing a proposed solution.
+- A new argument: constrain.modnegexp.  It is now possible to constrain
+  the modified negative exponential function to non-negative values at
+  infinity.
+- Warn if fit is not all positive (backup methods will be used)
+- Use simpler but equivalent rules for checking validity of ModNegExp fit
+- Small optimizations (rep.int; save and reuse length of input)
+
+File: redfit.c
+--------------
+
+- Avoid possibly buggy behavior in the unlikely case that cbind()
+  or length() have been redefined by the user
+
+File: redfit.R
+--------------
+
+- Use slightly faster .rowSums() instead of rowSums()
+- Simplified arithmetic expressions in getdof(): no multiplying by 2
+- Precomputed squared numbers in getdof()
+- Fixed Welch, Hanning, Triangular and Blackman-Harris windows to
+  be DFT-even
+- Computed more precise values for the 6 dB bandwidths of each window,
+  also for short windows.  Uniform sampling was assumed.
+- Two internal functions moved to top level, previously inside
+  print.redfit()
+
+File: tbrm.R
+------------
+
+- Check that C has length 1
+
+* CHANGES IN dplR VERSION 1.5.7
+
+File: DESCRIPTION
+-----------------
+
+- Import gmp (>= 0.5-2)
+
+File: NAMESPACE
+---------------
+
+- New imports from gmp and utils
+- Export redfit() and runcrit()
+
+Various .R files
+----------------
+
+- Check that length of vector does not overflow integer datatype
+  before use of .C()
+- Avoid possible name clashes when using foreach with parallel backends
+
+File: common.interval.R
+-----------------------
+
+- Optimizations (for example, less subsetting of the 'rwl' data.frame)
+- Better handling of corner cases (zero dimensions etc.)
+- In the plot (make.plot = TRUE), length of lines was adjusted:
+  First year a, last year b is 'b - a + 1' years, not 'b - a' years
+
+File: corr.rwl.seg.R
+--------------------
+
+- New feature: allow the master series to be built from a second set of
+  tree ring series by using a data.frame 'master' argument
+- Replaced some for loops with cleaner vectorized operations or apply().
+
+File: helpers.R
+---------------
+
+- Fixed a bug in fix.names(), related to creating unique short names.
+  The bug affected read.tridas(), write.compact(), write.tridas() and
+  write.tucson() but probably manifested itself quite rarely.
+
+File: rwi.stats.running.R
+-------------------------
+
+- Speedup by using rep.int() instead of rep()
+
+File: sea.R
+-----------
+
+- Extra input checks (e.g. x must have explicit, non-automatic row-names)
+- Some matrices now have the correct type (numeric instead of logical)
+  right from the beginning
+- Small optimization: a temporary matrix is completely overwritten on
+  every round of a loop, so no need to reinitialize
+- Braces always used in if (else) constructs
+
+Files: redfit.R, redfit.c
+-------------------------
+
+- New function redfit() based on REDFIT by Schulz and Mudelsee.  Also
+  another exported function runcrit().
+
+
+* CHANGES IN dplR VERSION 1.5.6
+
+File: write.tucson.R
+------------------------
+
+- Changed series IDs to justify left instead of right. I'm not sure why
+  they ever wanted to be justified left. Silly. (AGB)
+
+File: NAMESPACE
+---------------
+- Exporting new function common.interval()
+
+File: common.interval.R
+------------------------
+
+- New function common.interval() trims a rwl object to a common interval
+  using one of three methods. Contributed by a user Filipe Campelo (fcampelo@ci.uc.pt).
+  This is his first contribution. Added to author list in DESCRIPTION.
+
+File: corr.rwl.seg.R
+--------------------
+
+- Bug fix: series names were not shown (numbers were shown instead)
+- Bug fix: there were off-by-one errors in the length of the bars
+
+File: DESCRIPTION
+-----------------
+- Changed author and maintainer to Andy Bunn from Andrew G. Bunn to keep parity between
+  the names and the email address AGB uses to submit to CRAN. This was made at the
+  request of Kurt Hornik at CRAN
+
+* CHANGES IN dplR VERSION 1.5.5
+
+File: NAMESPACE
+---------------
+
+- Exporting new functions
+
+Various .R files:
+-----------------
+
+- Use 'nzchar(x)' instead of 'nchar(x) > 0'
+
+File: rwi.stats.running.R
+-------------------------
+
+- Added prewhitening option to rwi.stats.running() and by extension rwi.stats().
+  There are two new arguments prewhiten and n that are passed to normalize1()
+  as in the xdating functions e.g., corr.rwl.seg(). Help file changed.
+
+Files: corr.rwl.seg.R, seg.plot.R, rwl.stats.R, spag.plot.R
+-----------------------------------------------------------
+
+- Support for input of length 1
+
+
+File: corr.rwl.seg.R
+--------------------
+
+- Fixed 'ylim' in plot()
+- Fixed "no guides" case
+- stops with a clear error message if 'rwl' has too few rows for the given
+  'seg.length' and 'bin.floor' combination
+
+File: fill.internal.NA.R
+------------------------
+
+- New function fill.internal.NA() fills NA values internal to a series.
+  Written by Andy Bunn and Mikko Korpela. Help page added as well.
+
+File: pointer.R
+---------------
+
+- New function pointer() calculates pointer years from a group of
+  ring-width series.  Written by Pierre Mérian, adapted for dplR and
+  improved by Andy Bunn and Mikko Korpela. Help page added as well.
+
+File: rcs.R
+-----------
+
+- Graceful handling of empty input
+
+File: read.compact.R
+--------------------
+
+- Pretty printing of summary output, no more ragged lines
+
+File: read.fh.R
+---------------
+
+- Pretty printing of summary output, no more ragged lines
+- More robust detection of block and single column data representations
+- Data block, when using block representation, is interpreted as fixed
+  width fields (10*6)). Reference: TRiCYCLE Users Manual, Version 0.2.6.
+- Different units are supported. Default is 1/100 mm.
+- Each data block is mapped to the correct header block. Previously, there
+  was a risk of using the wrong header if the file contained data in
+  formats other than "Tree" or "Single". Also, the end position
+  of any data block could be off if data with different formats was
+  present in the file. Presumably the function would have failed with an
+  obscure error message.
+- Added support for site, tree, core, etc. metadata. Results are given as
+  an attribute of the return value, named "ids".
+- Added support for MissingRingsBefore (pith offset) metadata. Results are
+  given as an attribute named "po".
+
+File: read.tucson.R
+-------------------
+
+- Fixed trimming of all-NA rows
+- Fixed a bug that could crash R if the fided-width columns of the input
+  file did not follow the (loose) specifications of the Tucson format
+- AB: Note to dplR developers that this is a result of a poor standard in
+  the Tucson format but this fix is needed to work with files that are
+  on the ITRDB. Interestingly, dpl and ARSTAN are more robust to these
+  kinds of inconsistencies. Mikko's note: always check that your
+  assumptions a piece of input are correct before using the said input
+  to compute array indices, particularly in C code.
+- Can deal with CR CR LF newlines by reading the whole file into memory
+  at first and stripping empty lines
+- Can read non-standard files where one or more of the stop markers is
+  the 11th data column of its row
+- Can read non-standard files where columns don't have their proper
+  widths, including tab-delimited files
+- Can read non-standard files where missing data is marked with
+  non-numeric characters
+- Printed summary is justified, no more ragged lines
+- Interprets lines containing "#" characters (in positions 1-78) as
+  comments. For now, comments are ignored.
+- Fixed a bug that could cause mixing of values from two or more
+  measurement series sharing the same ID. Now it is an error if the input
+  file contains more than one measurement for any year, ID pair.
+- Accommodate mid-series upper and lower case differences: If a series
+  does not end with a stop marker, see if the series ID of the next row
+  after the last belonging to the series without a stop marker matches
+  when case differences are ignored. If so, interpret these as the same
+  series.
+
+File: write.tucson.R
+--------------------
+
+- Instead of always using 1000, 999 is now randomly converted to either
+  998 or 1000 (prec == 0.01) => no bias (even if small)
+
+* CHANGES IN dplR VERSION 1.5.4
+
+File: DESCRIPTION
+-----------------
+
+- Depends: R (>= 2.15.0) to accommodate use of .filled.contour() in
+  wavelet.plot(). Also enables the use of paste0().
+
+File: NAMESPACE
+---------------
+
+- Imports from package stringr (also in DESCRIPTION)
+- Exports new function autoread.ids()
+
+Various .R files
+----------------
+
+- use paste0(...) instead of paste(..., sep="")
+- prettier, more consistent formatting of source code
+
+File: helpers.R
+---------------
+
+- New internal function check.flags() requires that its arguments are TRUE
+  or FALSE
+
+File: read.ids.R
+----------------
+
+- Optional automatic detection of the site-tree-core scheme (stc="auto")
+- Optional fixing of typos in series names
+- Optional (adaptive) case insensitivity
+- New wrapper function autoread.ids() calls read.ids with stc="auto" and
+  an alternative set of parameter values
+
+File: read.tucson.R
+-------------------
+
+- More robust detection of header
+
+File: wavelet.plot.R
+--------------------
+
+- Switched from using an .Internal() call to using new bare-bones
+  function .filled.contour() for the plotting. This is at the
+  request of Prof. Ripley who wrote that 'Packages should not call
+  .Internal(): it is not part of the API, for use only by R itself
+  and subject to change without notice.' In 1.5.3, the use of
+  .Internal() or .filled.contour() was an if-else decision based on
+  the version of R, but now the latter function is always used,
+  making R >= 2.15.0 required.
+- enabled translation of default value of 'key.lab'
+- checks 'wave.list$x' and 'wave.list$period'
+
+Files: write.compact.R, write.tucson.R
+--------------------------------------
+
+- Useless uses of eval() removed
+
+2012-03-05 Andy Bunn
+* CHANGES IN dplR VERSION 1.5.3
+
+File: CITATION
+--------------
+
+- Uses the new bibentry() style
+- Has an automatic entry for the dplR manual (R >= 2.14.0 requirement)
+- Entry for "Statistical and visual crossdating in R using the dplR
+  library" was updated
+
+File: DESCRIPTION
+-----------------
+
+- Encoding: UTF-8
+- Depends: R (>= 2.14.0)
+- Author and Maintainer fields dropped (made obsolete by Authors@R)
+
+File: NAMESPACE
+---------------
+
+- import() or importFrom() from all the "base" Priority packages
+  that are used in dplR. Previously, the use of functions from those
+  packages seems to have relied on the assumption of them being
+  attached.
+
+  Quote from "Writing R Extensions":
+  "Packages implicitly import the base namespace. Variables exported
+  from other packages with namespaces need to be imported explicitly
+  using the directives import and importFrom."
+
+  Clearly, packages with Priority "base" (different from the package /
+  namespace called "base") fall into the category of "other packages".
+
+- importFrom() used in more cases
+
+- exports rwi.stats.legacy()
+
+File: powt.R
+------------
+
+- New function for power transformation after Cook and Peters
+
+File: rcs.R
+-----------
+
+- Allows for standardization by subtraction
+
+Files: read.crn.R, read.tucson.R
+--------------------------------
+
+- Fix handling of (effectively) empty lines (thanks to Heather
+  Gamper for reporting)
+
+File: rwi.stats.R
+-----------------
+
+- rwi.stats() was renamed to rwi.stats.legacy(), potentially useful for
+  comparing the results of the old and new code
+
+File: rwi.stats.running.R
+-------------------------
+
+- zero.is.missing now has default value TRUE
+- rwi.stats() is now a wrapper to rwi.stats.running()
+- allows 'ids' to have extra rows if all names of 'rwi' appear as its row
+  names
+
+File: strip.rwl.R
+-----------------
+
+- New function for EPS-based chronology stripping
+
+File: wavelet.plot.R
+--------------------
+
+- Replaces .Internal(filledcontour) with .filled.contour in R >= 2.15.0
+
+2012-01-19 Mikko Korpela
+* CHANGES IN dplR VERSION 1.5.2
+
+- Requires R >= 2.12.0 (use of markup in some Rd \title{} sections).
+- Documentation has been cleaned up / uses better markup.
+
+File: ffcsaps.R
+---------------
+
+- Checks that 'x' and 'y' are coercible to _numeric_ vectors
+
+File: read.ids.R
+----------------
+
+- Checks that 'stc' contains nothing but integral values and has length 3
+
+Files: write.compact.R, write.tridas.R, write.tucson.R
+------------------------------------------------------
+
+- Accept unknown arguments ('...')
+
+2011-12-19 Mikko Korpela
+* CHANGES IN dplR VERSION 1.5.1
+
+File: corr.rwl.seg.R
+--------------------
+
+- New parameters 'master' and 'master.yrs': Instead of letting
+  corr.rwl.seg() compute master series based on 'rwl', the user can use
+  her own master series.
+- Ensures that rwl (and master) have consecutive years in increasing order
+- Uses full form "greater" instead of "g" in calls to cor.test()
+
+File: corr.series.seg.R
+-----------------------
+
+- Uses full form "greater" instead of "g" in calls to cor.test()
+
+2011-11-23 Mikko Korpela
+* CHANGES IN dplR VERSION 1.5.0
+
+Various .R files:
+-----------------
+
+- Use TRUE instead of T
+- sapply() replaced with vapply() or vectorized operations
+
+File: detrend.series.R
+----------------------
+
+- Checks that there are no NAs in the middle of the series.  Series from
+  dplR rwl data.frames don't have mid-series NAs (unless manipulated by
+  the user), but other data might.
+
+File: read.crn.R
+----------------
+
+- Calls to read.fwf() now set the colClasses parameter. This gives
+  more predictable behavior when the input file contains non-integer
+  data where integers are expected. That is,.the function stops with
+  a clear error message, whereas previously, the resulting data.frame
+  would have contained seemingly random zeros.
+- Some optimizations (vectorization, less copying, etc.)
+- In the non-standard situation of multiple series per file, the previous
+  versions assumed the same range of years for all series. This rule,
+  breaking of which would give strange results, no longer applies.
+
+File: read.fh.R
+---------------
+
+- Replaced read.csv() with readLines()
+- Unnecessary captures removed from regular expressions
+- Small optimizations (e.g., positions() was replaced with a more
+  efficient solutions)
+- The possibly dangerous removal of zeros, even from the middle of
+  series, was rewritten
+- Gives a clear error message when a data series has unexpected length
+- Handles empty files / files with zero records better
+
+File: read.tucson.R
+-------------------
+
+- Calls to read.fwf() now set the colClasses parameter (see explanation
+  above)
+
+File: rwi.stats.running.R
+-------------------------
+
+- Fixes a bug where the function would not work if 'ids' was NULL
+
+2011-11-14 Mikko Korpela
+* CHANGES IN dplR VERSION 1.4.9
+
+File: rcompact.c
+----------------
+
+- read.compact() now accepts series IDs consisting of any sequence of
+  printable ASCII characters.
+
+2011-11-06 Mikko Korpela
+* CHANGES IN dplR VERSION 1.4.8
+
+File: NAMESPACE
+---------------
+
+- Made some internal functions truly internal by removing them from the
+  export list
+
+File: dplR-internal.Rd
+----------------------
+
+- The file was removed
+
+Various .c and .h files:
+------------------------
+
+- NULL, TRUE and FALSE are used for clarity
+- Rboolean type is now used more extensively for truth values
+- stddef.h is #included where NULL is used
+
+Various .R files:
+-----------------
+
+- When indexing data.frames, use df[[foo]][bar] instead of df[bar, foo]
+  when foo is a single index (or df$foo[bar] instead of df[bar, "foo"]).
+  The former is supposed to be faster than the latter.
+  https://stat.ethz.ch/pipermail/r-devel/2011-October/062313.html
+- Some input checks added
+
+File: combine.rwl.R
+-------------------
+
+- Avoids some conversions between matrix and data.frame
+
+File: ffcsaps.R
+---------------
+
+- For loop removed in ffppual (constant number of iterations)
+- Useless instances of cbind() and rbind() removed
+- Avoids computing or passing as arguments things that are already known
+  or constant
+- ffsorted2() is a modified version of ffsorted() which should speed
+  things up a little by making a rev() call unnecessary
+- Unnecessary call to pmax() removed
+- Added some input checks
+- order() is now used instead of sort(method="shell"), because the
+  requirements for the latter being a stable sort are unclear
+  (?sort in R 2.13.2), and stability of the sort is required
+  in some parts of ffcsaps (may be desirable in others)
+
+File: normalize1.R
+------------------
+
+- For consistency, the first part of the returned list is now a
+  matrix regardless of the value of 'prewhiten'.  This also gives an
+  amazing speed improvement in corr.rwl.seg: from 42 seconds to 1
+  second in the ?corr.rwl.seg Example, modified with
+  prewhiten=FALSE, make.plot=FALSE.  This corrects the performance
+  degradation introduced in dplR 1.2.7.  Tested on a computer with a
+  Core 2 processor, 3.0 GHz.
+
+File: rcompact.c
+----------------
+
+- Now accepts series IDs with spaces.
+
+File: seg.plot.R
+----------------
+
+- Uses order() and numeric indexing instead of sort() and indexing with
+  names
+
+File: skel.plot.R
+-----------------
+
+- Replaced one for loop with vectorized operations
+
+File: spag.plot.R
+----------------
+
+- Uses order() and numeric indexing instead of sort() and indexing with
+  names
+
+2011-09-14 Mikko Korpela
+* CHANGES IN dplR VERSION 1.4.7
+
+Various .R files:
+-----------------
+
+- For data.frames, row.names() is now used instead of rownames().
+  The opposite change was applied in one location (not a data.frame).
+  Also, names() is used instead of colnames() where appropriate.
+  This is because names() and row.names() are preferred to
+  colnames() and rownames(), respectively, when dealing with data.frames.
+
+File: read.ids.R
+----------------
+
+- Fixed a bug introduced in dplR 1.4.1 where the function would	not work
+  for non-numeric identifiers or when identifiers did not fall in the
+  range from 1 to n.
+
+- Now respects input identifiers where possible: If all substrings
+  denoting tree or core are integers, they are used. Otherwise,
+  sorted unique identifiers (number of which is n.unique) are mapped
+  to numbers 1:n.unique.
+
+- Now allows the sum of the site-tree-core mask to be smaller than 8.
+  The remaining characters will be ignored. This can be handy if there are
+  additional levels in the ID hierarchy. Then, the series with matching
+  ID strings up to the sum of the site-tree-core mask will be given
+  matching tree and core numbers.
+
+File: rwi.stats.running.R
+-------------------------
+
+- Now averages data from series with the same tree/core ID combination
+  before computing any statistics.
+
+- Now has the option to treat zeros as missing data (parameter
+  zero.is.missing).  Defaults to FALSE which gives identical results
+  compared to previous versions of the function, but should probably be
+  set to TRUE for most purposes.
+
+2011-09-01 Mikko Korpela
+* CHANGES IN dplR VERSION 1.4.6
+
+File: corr.rwl.seg.R
+--------------------
+
+- Fixed a bug in the $flags part of the list returned by the
+  function. Previously, a single flagged segment / series was not
+  reported.
+
+File: corr.series.seg.R
+-----------------------
+
+- Fixed a bug where moving correlations were computed using a window one
+  year longer than seg.length. This problem had gone unnoticed when
+  fixing some related bugs for version 1.4.5.
+- Changed the x and y limits of the plot. Now the computation of the y
+  limits does not use p-values as an input (the y-axis is correlation, not
+  p-value). x limits are now set explicitly, and generally speaking there
+  is more space around the plotted data.
+
+2011-08-11 Mikko Korpela
+* CHANGES IN dplR VERSION 1.4.5
+
+Various .R files:
+-----------------
+
+- Updates to sequence generation, e.g. use seq_along and seq_len where
+  applicable
+
+Files: ccf.series.rwl.R, corr.rwl.seg.R, corr.series.seg.R, series.rwl.plot.R
+-----------------------------------------------------------------------------
+
+A bunch of related bugs were fixed, some not present or already
+(partially) fixed in some files:
+- Fixed a bug where segment length was always actually one year longer
+  than the specified seg.length (not in corr.rwl.seg.R, corr.series.seg.R).
+- Fixed a bug where the requirement of fitting at least two segments
+  did not take into account overlapping segments (seg.lag), therefore
+  requiring more than the minimum number of years (not in corr.rwl.seg.R).
+  Note: qa.xdate() still requires nrow(rwl) >= seg.length*2.
+- Added a "plus 1" option (floor.plus1) to location of first segment.
+  Works together with parameter bin.floor. Default value is FALSE.
+
+- In corr.rwl.seg.R, cleaned up the code and fixed some bugs related to
+  segment boundaries.
+- In corr.rwl.seg.R, fixed a bug where multiple disconnected red segments
+  were not drawn correctly.
+- In corr.rwl.seg.R, removed unused variables / operations
+- In corr.rwl.seg.R and corr.series.seg.R, arguably prettier x axis ticks
+  and labels are used (now separated by seg.length).
+- In corr.series.seg.R, an additional error check was added
+
+File: tbrm.c
+------------
+
+- "Nothing to sum" case, when there are some numbers but all are too far
+  from median, returns NaN instead of NA.  Finally, this is consistent
+  with tbrm() coded in R, prior to dplR 1.2.7.
+
+File: write.compact.R
+---------------------
+
+- Fixed two precedence issues that luckily didn't result in erroneous
+  behaviour of the function
+
+2011-07-03 Mikko Korpela
+* CHANGES IN dplR VERSION 1.4.4
+* Changes in documentation will not be reported anymore
+
+Various .R files:
+-----------------
+
+- Parameters not changed by assignment anymore (complaint by
+  codetools). Applies to direct assignment; assign() etc go unnoticed by
+  codetools.
+
+File: ccf.series.rwl.R
+----------------------
+
+- Cosmetic changes (white spaces, assignment operator)
+- Parameter 'cex' is given in the call to xyplot, like 'col.line'. Both go
+  to 'panel' in '...'.
+- Parameter 'col' removed from function 'panel'
+- Some extra steps are taken because we want to ensure correct operation
+  now when formal parameters are not changed by assignment
+- (1 + 1 - pcrit) / 2 == 1 - pcrit / 2 (at least within floating point
+  precision), so we use the latter which is a simpler form
+
+File: chron.R
+-------------
+
+- Argument checking updated
+
+File: corr.series.seg.R
+-----------------------
+
+- Some extra steps are taken like in ccf.series.rwl.R
+- (1 + 1 - pcrit) / 2 == 1 - pcrit / 2
+
+File: detrend.R
+---------------
+
+- Parameter 'f' now has an explicit default value
+
+File: detrend.series.R
+----------------------
+
+- Unnecessary double checking of 'method' argument removed
+- Parameters 'f' and 'y.name' now have explicit default values
+- Graphical parameters are reset on.exit()
+
+File: ffcsaps.R
+---------------
+
+- Uses complete parameter names in calls to sort
+
+File: glk.R
+-----------
+
+- Large parts rewritten
+- 'glk(ca533)' example in glk.Rd runs about 100 times faster
+- Now explicitly requires that the non-NA overlap between series be
+  contiguous, which should be true in dplR. This was not checked in
+  previous versions.
+
+File: hanning.R
+---------------
+
+- Slightly more efficient computation
+
+File: i.detrend.R
+-----------------
+
+- Parameter 'f' now has an explicit default value
+
+File: i.detrend.series.R
+------------------------
+
+- Parameter 'f' now has an explicit default value
+- Fixed a bug where the values of the parameters 'f', 'nyrs' and
+  'pos.slope' were not reflected in the returned result, only in the
+  picture.
+- Saved result is used instead of detrending twice (once with all methods,
+  then with selected method)
+- "Enter a number" is asked until a valid number is received. Normal
+  interrupt sequences work.
+
+File: morlet.R
+--------------
+
+- Removed 'param' and made 'k0=6' an explicit default in morlet.func()
+- seq(from=1, to=n) - 1 == seq(from=0, to=n-1)
+- log2(x) instead of log(x) / log(2)
+- Cosmetic changes
+
+File: series.rwl.plot.R
+-----------------------
+
+- Some extra steps are taken like in ccf.series.rwl.R
+- Graphical parameters are reset on.exit()
+
+File: wavelet.plot.R
+--------------------
+
+- log2(x) instead of log(x) / log(2)
+
+File: write.tridas.R
+--------------------
+
+- Fixed a bug in the handling of parameter 'crn.units'
+
+2011-07-01 Mikko Korpela
+* CHANGES IN dplR VERSION 1.4.3
+* Changes below by Mikko Korpela
+
+Directory: po
+-------------
+
+- A new directory used for language translations
+http://cran.r-project.org/doc/manuals/R-exts.html#Internationalization
+
+Directory: inst/po
+------------------
+
+- Location for compiled translations
+
+Directory: inst/po/fi and contents
+---------------------
+
+- Compiled Finnish translations
+
+Various .R files:
+-----------------
+
+- Diagnostic and normal output messages were edited to facilitate
+  translations. Messages consist of logical units (no small fragments, but
+  sequences of sentences is possible), and gettext() and
+  gettextf() are used. Also plot labels, titles and legends are ready for
+  translation
+
+File: po/R-dplR.pot
+-------------------
+
+- A translation template for messages in R code
+
+File: po/dplR.pot
+-------------------
+
+- A translation template for messages in C code
+
+File: po/R-fi.po
+----------------
+
+- Finnish translations of messages in R code
+
+File: po/fi.po
+--------------
+
+- Finnish translations of messages in C code
+
+File: src/dplR.h
+----------------
+
+- A new file that (initially) contains definitions used for looking up
+  translations of messages appearing in C code
+
+File: src/rcompact.c
+--------------------
+
+- Supports translation of messages via _(...), where ... is the string to
+  translate
+
+File: DESCRIPTION
+-----------------
+
+- Added a link to the R-Forge dplR development page
+
+File: cms.R
+-----------
+
+- Better checking of pith offset names
+- Big performance improvement, mostly due to using vector operations
+  instead of a for loop
+- Results slightly different (on the order of 1e-15) due to polyroot
+  having been replaced with quadratic formula, order of arithmetic
+  operations etc.
+- Helper function now has 2 parameters: no need for cbind() in caller
+
+File: corr.rwl.seg.R
+--------------------
+
+- Additional parameter in yr.range()
+- First definition of segavg.cor was not used. Now removed.
+- Some unnecessary name assignments and conversions to data.frame removed
+
+File: detrend.series.R
+----------------------
+
+- Fixed a bug caused by incorrect syntax in named argument (was <- in
+  1.4.1 and 1.4.2, correct form is =). ModNegExp detrending works
+  again.
+
+File: glk.R
+-----------
+
+- Uses the complete argument name MARGIN instead of MAR
+
+File: helpers.R
+---------------
+
+- Additional parameter in yr.range(). Used by all callers.
+
+File: rcs.R
+-----------
+
+- Uses warning() instead of cat() in one (unlikely?, impossible?) error
+  situation
+- Better checking of pith offset names
+- yr.range() called in "the big for loop" instead of apply. The loop
+  exists anyway, and there's no need to keep yr.range() of all
+  series at the same time.
+- rwca is no longer a data.frame, and doesn't have unnecessary colnames
+
+File: read.tridas.R
+-------------------
+
+- Fixed a bug where a wrong number of derived series was reported in
+  summary output
+- A performance optimization for the case where ids.from.title is FALSE,
+  ids.from.identifiers is TRUE (the defaults), and there are no identifiers
+
+File: series.rwl.plot.R
+-----------------------
+
+- Uses complete argument names
+
+File: wavelet.plot.R
+--------------------
+
+- Uses complete argument names
+- gettext() is used in some default values
+
+File: wavelet.plot.Rd
+---------------------
+
+- Uses complete argument names
+- Default values match the changes in wavelet.plot.R
+
+File: write.crn.R
+-----------------
+
+- Uses complete argument names
+
+* CHANGES IN dplR VERSION 1.4.2
+* Ran through Mikko's changes. June 2, 2011. AGB
+* Changes below by Mikko Korpela
+
+All .rda data files (change reported June 7, after release in CRAN)
+-------------------
+
+- Data files were repackaged by R-Forge using a tight compression
+  level. This is done every time R-Forge builds the dplR package, but the
+  files are expected to stay identical if no changes are made to the
+  compression system. The new data files supposedly require R 2.10.0, but
+  this does not affect dplR which requires R >= 2.11.0 anyway.
+
+File: ccf.series.rwl.R
+----------------------
+
+- as.vector() is more intuitive than c() with one argument
+- Cosmetic improvement
+
+File: ccf.series.rwl.Rd
+-----------------------
+
+- bin.floor must be non-negative, not necessarily positive
+
+File: cms.R
+-----------
+
+- Removed redundant c()
+- Some values are stored for reuse
+
+File: corr.rwl.seg.R
+--------------------
+
+- par(op) moved to on.exit()
+- Odd and even segs are plotted with the same code, avoiding copy-paste
+- Some values are stored for reuse
+- Some unnecessary colnames are not set
+- Cosmetic improvement
+
+File: corr.rwl.seg.Rd
+---------------------
+
+- bin.floor must be non-negative, not necessarily positive
+
+File: corr.series.seg.Rd
+------------------------
+
+- bin.floor must be non-negative, not necessarily positive
+
+File: crn.plot.R
+----------------
+
+- Default value of f is explicitly 0.5
+
+File: crn.plot.Rd
+-----------------
+
+- Clarified the default values of f and nyrs
+
+File: ffcsaps.R
+---------------
+
+- Cosmetic improvement
+
+File: i.detrend.series.R
+------------------------
+
+- A value is stored for reuse
+- Cosmetic change
+
+File: qa.xdate.R
+----------------
+
+- bin.floor must be non-negative, not necessarily positive
+- Checks that bin.floor is non-negative.
+
+File: rcompact.c
+----------------
+
+- Accepts comment lines in the beginning of the file
+- Cosmetic changes (formatting of comments)
+- UNPROTECT all PROTECTed structures at the same time
+
+File: rcs.R
+-----------
+
+- Some values are stored for reuse
+
+File: read.compact.R
+--------------------
+
+- Prints comments found in the file (if any)
+
+File: rwi.stats.R
+-----------------
+
+- Within-tree signal is now computed correctly (thanks to Pierre Mérian)
+
+File: rwl.stats.R
+-----------------
+
+- Removed redundant instances of c()
+- Cosmetic improvement
+
+File: series.rwl.plot.Rd
+------------------------
+
+- bin.floor must be non-negative, not necessarily positive
+
+File: skel.plot.R
+-----------------
+
+- Only makes as many viewports as needed
+- Some values are stored for reuse
+- Checks that length of input exceeds a minimum value
+- Avoids warning from giving an empty vector to range()
+
+File: wavelet.plot.R
+--------------------
+
+- Some lines previously in both branches of if-else now appear only once
+- Avoids a duplicate call to unique()
+
+2011-05-26 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.4.1
+* All changes by Mikko Korpela
+
+File: DESCRIPTION
+-----------------
+
+- Minimum R version is now 2.11.0 (previously not specified). Reason
+  behind the requirement: The encoding support added to read.tucson
+  brought out a bug in read.fwf. The bug exists in 2.10.1 but is fixed
+  in 2.11.0.
+- Suggests foreach and iterators (used in some functions if installed)
+
+Files: bai.in.R, bai.in.Rd, bai.out.R, bai.out.Rd
+-------------------------------------------------
+
+- Cosmetic improvement
+- Also changed indentation of .R files to the recommended 4 spaces, as
+  in the other .R, .c and .h files edited in this patch set.
+
+File: ccf.series.rwl.R
+----------------------
+
+- || instead of |
+- Optimized the order of expressions in a chain of the form
+  x_1 || ... || x_n (order did not matter when | was used)
+- Removed an unused variable.
+- Cosmetic improvement
+
+File: ccf.series.rwl.Rd
+-----------------------
+
+- Cosmetic improvement
+
+File: chron.R
+-------------
+
+- Removed redundant c()
+- Default value of prefix is now "xxx". Previously the default value
+  was NULL, which was then converted to "xxx".
+- Cosmetic improvement
+
+File: chron.Rd
+--------------
+
+- Documents new (explicit) default value of prefix.
+- Cosmetic improvement
+
+File: cms.R
+-----------
+
+- Some added robustness against weird input
+- Optimizations
+- Cosmetic improvement
+
+File: cms.Rd
+------------
+
+- Note about the requirement that the years be increasing and
+  continuous
+
+File: combine.rwl.R
+-------------------
+
+- Input handling was improved.
+- Loops were eliminated from combinator()
+
+File: combine.rwl.Rd
+--------------------
+
+- Note about requirements for input (also existed in previous
+  versions)
+- Author of the patch mentioned
+
+File: corr.rwl.seg.R
+--------------------
+
+- || instead of |
+- Optimized the order of expressions in a chain of the form
+  x_1 || ... || x_n (order did not matter when | was used)
+- Small optimizations
+- Cosmetic improvement
+
+File: corr.series.seg.R
+-----------------------
+
+- Cosmetic improvement
+
+File: crn.plot.R
+----------------
+
+- Cosmetic improvement
+
+File: detrend.R
+---------------
+
+- Under some circumstances, the function now uses the foreach /
+  %dopar% structure from the foreach package.  Conditions for this to
+  happen: foreach must be installed, and at least one of the more
+  time-consuming detrending methods must be used ("Mean" doesn't
+  qualify).  For a speed gain, the user must register a parallel backend
+  for foreach.
+- Cosmetic improvement
+
+File: detrend.Rd
+----------------
+
+- Added notes about foreach and the detrending methods used by default.
+
+File: detrend.series.R
+----------------------
+
+- && instead of &
+- Now uses match.arg.
+- Cosmetic improvement
+
+File: detrend.series.Rd
+-----------------------
+
+- Added a note about the detrending methods used by default.
+
+File: exactmean.c
+-----------------
+
+- Removed some explicit type casts.
+- Doesn't use (pointless) dynamic memory allocation anymore.
+
+File: exactmean.R
+-----------------
+
+- Converts the return value of length() to an integer: "programmers
+  should not rely on it" (i.e. the return value may not be an
+  integer).
+
+File: exactsum.c
+----------------
+
+- Makes use of dplr_double instead of long double.
+
+File: exactsum.h
+----------------
+
+- Defines and explains the new type dplr_double (for now, same as long
+  double).
+
+File: ffcsaps.R
+---------------
+
+- Tweaked error messages (should -> must)
+- Cosmetic improvement
+
+File: gini.c
+------------
+
+- Uses floating point constants instead of integer constants where
+  appropriate.
+- Some pointless dynamic memory allocations were removed (replaced by
+  statically allocated memory).
+
+File: gini.coef.R
+-----------------
+
+- Converts the return value of length() to an integer.
+
+File: glk.R
+-----------
+
+- Removed an unused variable.
+- Cosmetic improvement
+
+File: helpers.R
+---------------
+
+- Removed unused matching functions, added a function that is actually
+  used (moved from read.tridas.R)
+- Also moved some other functions here
+
+File: i.detrend.R
+-----------------
+
+- Fixed a bug where arguments nyrs, f, and pos.slope were not being
+  passed to i.detrend.series.
+- Cosmetic improvement
+
+File: i.detrend.series.R
+------------------------
+
+- Fixed a bug where arguments nyrs, f, and pos.slope were not being
+  passed to detrend.series.
+- Cosmetic improvement
+
+File: morlet.R
+--------------
+
+- Commented out the unused variables.
+- Cosmetic improvement
+
+File: normalize.xdate.R
+-----------------------
+
+- Cosmetic improvement
+
+File: normalize1.R
+------------------
+
+- Cosmetic improvement
+
+File: qa.xdate.R
+----------------
+
+- Cosmetic improvement
+
+File: rcompact.c
+----------------
+
+- Some pointless dynamic memory allocations were removed (replaced by
+  statically allocated memory).
+
+File: rcs.R
+-----------
+
+- Cosmetic improvement
+
+File: read.compact.Rd
+---------------------
+
+- New entries in "See Also"
+
+File: read.crn.R
+----------------
+
+- Streamlined file handling code.
+- Now has a parameter for the encoding used in the data file. This
+  makes it possible to read files with any character encoding
+  supported by R (may vary between R installations).
+- Removed an unused variable.
+- Improved "if" constructs (|| instead of |, evaluation only until first TRUE)
+- Cosmetic improvement
+
+File: read.crn.Rd
+-----------------
+
+- Documents the new encoding parameter.
+
+File: read.fh.R
+---------------
+
+- Fixed one if condition.
+- Now prints a summary of the data.frame, like the other read functions.
+- Streamlined code
+- Cosmetic improvement
+
+File: read.fh.rd
+----------------
+
+- Author of the patch mentioned
+
+File: read.ids.R
+----------------
+
+- Streamlined code
+- Cosmetic improvement
+
+File: read.ids.Rd
+-----------------
+
+- Author of the patch mentioned
+
+File: read.rwl.R
+----------------
+
+- Automatic detection of file type now includes TRiDaS and Heidelberg
+  formats.
+- Now uses match.arg and a switch expression to select the right branch.
+
+File: read.rwl.Rd
+-----------------
+
+- Shows the new default value of the format parameter (related to the
+  use of match.arg).
+- Lists TRiDaS and Heidelberg formats.
+- Removed some "See" links from "Details", because there is a separate
+  "See Also" section, and the "See" links did not serve a specific
+  purpose.
+- Describes the different return values when reading different types
+  of data files.
+- Literal quotes were replaced with \dQuote.
+
+File: read.tridas.R
+-------------------
+
+- Spelling change "meter" -> "metre"
+- Helper functions moved elsewhere to make the file shorter.
+- Changed the environment where some functions are defined.
+- All end tag handlers now call function end.element.  Makes the code
+  shorter but increases running time.  Now xgettext does not complain
+  about read.tridas being too long.  It might be good to pay attention
+  to the recommendations concerning diagnostic messages at
+http://cran.r-project.org/doc/manuals/R-exts.html#Diagnostic-messages
+
+File: read.tridas.Rd
+--------------------
+
+- New entries in "See Also"
+- Spelling change "meter" -> "metre"
+
+File: read.tucson.R
+-------------------
+
+- Now has a parameter for the encoding used in the data file. This
+  makes it possible to read files with any character encoding
+  supported by R (may vary between R installations).
+- New fix.internal.na copes with successive NAs and vectors with less
+  than 2 elements
+- Cosmetic improvement
+
+File: read.tucson.Rd
+--------------------
+
+- New entries in "See Also"
+- Documents the new encoding parameter.
+
+File: readloop.c
+----------------
+
+- Uses floating point constants instead of integer constants where
+  appropriate.
+
+File: rwi.stats.R
+-----------------
+
+- && instead of &
+- Now uses match.arg for 'period'.
+- An additional check is applied to the input.
+- Cosmetic improvement
+
+File: rwi.stats.Rd
+------------------
+
+- Shows the (technically) new default value of 'period'.
+
+File: rwi.stats.running.R
+-------------------------
+
+- An additional check is applied to the input.
+- If the foreach package is installed, the function now uses it and
+  %dopar% for executing the loop that iterates over the various
+  running windows. If a parallel backend for foreach has been
+  registered, this should give a nice speedup.
+- Removed some unnecessary calls to inc, where the conventional
+  from:to is guaranteed to succeed (to > from).
+- Fixed an off-by-one error in max.offset.
+- Now uses match.arg for 'period'.
+
+File: rwi.stats.running.Rd
+--------------------------
+
+- Note about using the foreach package.
+- Shows the (technically) new default value of 'period'.
+
+File: sea.R
+-----------
+
+- In warnings, we use multiple arguments instead of paste.
+- select.y() was removed (rows of data.frames can be indexed with
+  character strings).
+- Number of nested for loops was reduced.
+- Unnecessary computations were removed.
+- Added a check that the input x is a data.frame.
+- Check whether 'se' is NA.
+- Streamlined code.
+
+File: sea.Rd
+------------
+
+- Author of the patch mentioned
+
+File: sens.c
+------------
+
+- Uses floating point constants instead of integer constants where
+  appropriate.
+- Some pointless dynamic memory allocations were removed (replaced by
+  statically allocated memory).
+
+Files: sens1.R, sens2.R
+-----------------------
+
+- Converts the return value of length() to an integer.
+
+File: series.rwl.plot.R
+-----------------------
+
+- Removed unused variables.
+- Cosmetic improvement
+
+File: series.rwl.plot.Rd
+------------------------
+
+- Author of the patch mentioned
+
+File: skel.plot.R
+-----------------
+
+- && instead of &
+- Unnecessary third column of 'skel.df' removed
+- Cosmetic improvement
+
+File: skel.plot.Rd
+------------------
+
+- Cosmetic change
+
+File: spag.plot.R
+-----------------
+
+- on.exit() is used for resetting graphical parameters
+- Cosmetic improvement
+
+File: tbrm.R
+------------
+
+- Converts the return value of length() to an integer.
+
+File: tbrm.c
+------------
+
+- No longer uses long doubles in places where they are not really
+  needed. May slightly affect some computation results.
+- Removed some explicit type casts.
+- Removed two temporary variables. Now the expressions used for
+  computing them are used directly in the proper place.
+- Uses floating point constants instead of integer constants where
+  appropriate.
+- Uses right shift instead of division by two where appropriate.
+- A relatively pointless dynamic memory allocations was removed
+  (replaced by statically allocated memory).
+
+File: wavelet.plot.R
+--------------------
+
+- Removed and commented out unused variables
+- Default value of 'f' is now explicitly 0.5.
+- Some cosmetic / readability improvements
+
+File: wavelet.plot.Rd
+---------------------
+
+- Default value of 'f' reported differently.
+- Cosmetic improvements
+
+File: wc.to.po.R
+----------------
+
+- The function was moved from read.tridas.R to a new file.
+
+File: write.compact.R
+---------------------
+
+- || instead of |
+- Uses on.exit() for closing the file
+- Cosmetic improvements
+
+File: write.compact.Rd
+----------------------
+
+- New entry in "See Also"
+
+File: write.crn.R
+-----------------
+
+- Removed unused variables.
+- Streamlined code
+- Cosmetic improvement
+
+File: write.crn.Rd
+------------------
+
+- Max Width of Site ID is 6, not 5
+- Some typos fixed
+
+File: write.rwl.R
+-----------------
+
+- Added the option to write in the TRiDaS format.
+- Now uses match.arg and a switch expression to select the right
+  branch ('format').
+
+File: write.rwl.Rd
+------------------
+
+- Added notes related to the newly added support for the TRiDaS
+  format.
+- Removed some "See" links from "Details", because there is a separate
+  "See Also" section, and the "See" links did not serve a specific
+  purpose.
+- Shows the new default value of the format parameter.
+- Literal quotes were replaced with \dQuote.
+- New entry in "See Also"
+
+File: write.tridas.Rd
+---------------------
+
+- Spelling change "meter" -> "metre"
+- New entries in "See Also"
+- Cosmetic improvement
+
+File: write.tucson.R
+--------------------
+
+- Reduced the number of names in the dplR name space by wrapping the
+  creation of the format.tucson list inside an anonymous function.
+- Removed unused variables.
+- Streamlined code
+- Cosmetic improvement
+- Uses on.exit() for closing the file
+- Uses || instead of |
+
+File: write.tucson.Rd
+---------------------
+
+- New entry in "See Also"
+
+
+2011-05-18 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.4.0
+* Incporporation of TRiDAS via Mikko Korpela, May 16, 2011
+
+File: NAMESPACE
+---------------
+
+New imports (digest, xmlEventParse from XML)
+and exports (read.tridas, write.tridas, uuid.gen, po.to.wc, wc.to.po,
+tridas.vocabulary).
+
+File: po.to.wc.Rd
+-----------------
+
+New documentation file.
+
+File: read.tridas.R
+-------------------
+
+New file. Function for reading TRiDaS format files.
+
+File: read.tridas.Rd
+--------------------
+
+New documentation file.
+
+File: simpleXML.R
+-----------------
+
+Fast function for writing XML files. Used in write.tridas, not
+exported to user.
+
+File: tridas.vocabulary.R
+-------------------------
+
+New file. Function for browsing TRiDaS vocabulary.
+
+File: tridas.vocabulary.Rd
+--------------------------
+
+New documentation file.
+
+File: uuid.gen.R
+----------------
+
+The new function uuid.gen creates a generator of Universally Unique
+IDentifiers (UUIDs). It uses the digest package, making it a new
+dependency of dplR. The code in uuid.gen itself is very simple.
+
+This is a very generally applicable function. It is used in
+write.tridas, but may also be useful to R users in general.
+
+The synchronicity package in CRAN provides similar functionality (and
+more), but is not available for Windows. Also, the UUID generator
+returned by uuid.gen seems to be faster than the uuid function in
+synchronicity. More specifically, the latter uses much more system
+time. The difference in user time is small (in favor of uuid of
+synchronicity).
+
+File: uuid.gen.Rd
+-----------------
+
+New documentation file.
+
+File: wc.to.po.Rd
+-----------------
+
+New documentation file.
+
+File: write.tridas.R
+--------------------
+
+New file. Function for writing TRiDaS format files.
+
+File: write.tridas.Rd
+---------------------
+
+New documentation file.
+
+
+2010-11-15 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.9
+* Added an option to control the colors in plot.wavelet().
+* Added an option to plot wavelets side by side instead of stacked (plus a few owther beutifications).
+* Changes mostly in wavelet.plot.R and arg side.by.side and key.col added to the help.
+* Added an axis on side three for the wavelet plot.
+
+2010-10-27 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.8 all from Mikko Korpela
+File: corr.rwl.seg.R
+--------------------
+
+* Changed the code that computes the first year of the first segment. Now it doesn't waste data in the case that the first year of the data is at a multiple of bin.floor. The same change was made to corr.series.seg.R in an earlier patch (dplR 1.3.3).
+Previously: else min.bin = min.yr%/%bin.floor*bin.floor+bin.floor
+Now: else min.bin = ceiling(min.yr/bin.floor)*bin.floor
+* The size of the bins is now seg.length, not seg.length+1.
+* Fixed some (potential) errors caused by R dropping dim() when subsetting an array. The fix was to add drop=FALSE.
+* Small optimizations in the style of an earlier patch to corr.series.seg.R.
+* Replaced & with && in some if conditions.
+* Adjusted the indentation of the source code.
+* Added a check requiring >= 2 series in rwl.
+
+File: corr.rwl.seg.Rd
+---------------------
+
+* Updated the min.yr, bin.floor code excerpt included in the document.
+
+File: corr.series.seg.R
+-----------------------
+
+* The size of the bins is now seg.length, not seg.length+1.
+* Similarly, what was previously
+  to = max(series.yrs)-seg.length-seg.length
+is now
+  to = max(series.yrs)-seg.length-seg.length+1
+
+File: crn.plot.R
+----------------
+
+* Moved resetting of graphical parameters to on.exit. As a result, resetting also works in case of an unexpected error that terminates the function.
+* Reworked the structure of the function so that lines of code that are common to different branches (sample depth or no sample depth) are not replicated. Also removed special treatment of the case of nCrn==1. These changes have no effect on the output (the plot).
+* Other tweaks also, mostly cosmetic.
+
+File: detrend.series.Rd
+-----------------------
+
+* Correction to documentation: If only one method is selected, the function returns a vector.
+
+File: ffcsaps.R
+---------------
+
+* An ugly work-around (test and transpose) for unwanted dimension dropping was replaced by drop=FALSE. Why didn't I discover this solution earlier...
+
+File: helpers.R
+---------------
+
+* Added a few new helper functions: fix.names is (or will be) used in a few functions, and some other functions are "helpers of the helper". Compared to the old fix.names (previously in write.tucson.R), the new one has the option of unlimited name length, and the option of limiting the set of allowed characters to the union of LETTERS, letters, and 0:9, where letters (LETTERS) are the lowercase (uppercase) letters of the English alphabet.
+* The new is.int tests if numbers have integer value.
+
+File: morlet.R
+--------------
+
+* Added drop=FALSE to a few matrix subset operation, just to be on the safe side (later it's assumed that wave is a matrix). I don't know if the danger of a dimension drop (conversion to vector) could have materialized with any (valid) inputs.
+
+File: normalize.xdate.R
+-----------------------
+
+* drop=FALSE
+
+File: qa_xdate.R
+----------------
+
+* There is now a check that catches negative seg.length.
+* The helper function is.int previously found in this file is now in helpers.R (completely rewritten).
+
+File: rcs.R
+-----------
+
+* Removed the internal is.int function. The main function now uses the new version of is.int, located in helpers.R, which works not only for single numbers, but for longer vectors and arrays also. This upgrade in functionality is necessitated by the way the function is used in rcs.R.
+* Fixed a bug, where the function only checked that the first pith offset is integer. Now checks all pith offsets.
+
+File: read.crn.R
+----------------
+
+* Like rcs.R, also this function now uses the is.int located in helpers.R.
+* drop=FALSE was applied to many expressions.
+
+File: read.tucson.R
+-------------------
+
+* drop=FALSE
+* no more as.matrix in many expressions
+
+File: rwi.stats.running.R
+-------------------------
+
+* rwi is transformed to matrix form at an early stage, which may result in faster operation.
+* drop=FALSE
+* no more as.matrix in many expressions
+
+File: seg.plot.R
+----------------
+
+* Does not crash in the case of ncol(rwl) == 1.
+* Resets graphical parameters on exit, even in error cases.
+
+File: spag.plot.R
+-----------------
+
+* Fixed plotting of a one-series data.frame.
+* Previously, the number of columns in rwl was computed with both dim(rwl)[2] and ncol(rwl). These are equivalent. Only one of them remains.
+* Checks that at least one series was given, otherwise stops.
+* Computes y axis limits more sensibly: due to overlap being allowed in the plot, the maximum value may occur in a series other than the one that is ordered to be drawn on the top of the spaghetti plot. Also, the previous upper limit setting computed the maximum over a set of one value (which is wrong) that was possibly NA (which would crash the function). A plausible explanation for the origin of this bug is the conversion from data.frame to matrix performed by the scale function. This was probably not taken into account when indexing rwl with rwl[nseries].
+
+File: write.compact.R
+---------------------
+
+* Now produces files with DOS / Windows / etc. line terminators, CR+LF, on all platforms. If this has any effects on compatibility with old software (not sure about that), I expect the positives to outweigh the negatives. Also, files with Unix (LF) line terminators (previously created by dplR on Linux and other systems using LF) may show as one long line with primitive text editors in Windows.
+* The function now enforces a maximum length for series names differently: does not stop and print an error, but truncates the name. Also, the function no longer stops when characters outside the ranges a-z, A-Z, 0-9 are found, but fix.names drops the offending characters. The previous regular expression used for testing series names may have accepted non-ASCII letters, but fix.names does not (with basic.charset == TRUE). The mapping from original names to names created by fix.names can be written to a file (two new parameters to the function).
+* Replaced one as.data.frame with a solution based on drop=FALSE.
+
+File: write.compact.Rd
+----------------------
+
+* Added descriptions of the new parameters of the function. The descriptions are the same as in write.tucson.Rd.
+* Added information about allowed series ids and automatic renaming.
+* Author info now correctly refers to write.tucson instead of write.rwl.
+
+File: write.tucson.R
+--------------------
+
+* The function no longer stops when characters outside the ranges a-z, A-Z, 0-9 are found, but fix.names drops the offending characters.
+* Any automatic changes to series ids result in a warning or several warnings. Also, if the option to write id changes to a file is used, all the changes are written to the file. Previously, the excess tail of ids could be silently cut off.
+* Now produces files with DOS / Windows / etc. line terminators, CR+LF, on all platforms. See write.compact.R.
+* Removed the unused variable hdr.
+* Moved some helper functions to helpers.R.
+* Replaced one as.data.frame with a drop=FALSE solution.
+
+File: write.tucson.Rd
+---------------------
+
+* Adjusted the description of parameter mapping.fname: Now all changed series ids are printed, also the ones that were only truncated.
+* Adjusted the part of the Details section that describes automatic editing of series ids.
+
+
+
+2010-09-21 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.7
+* Modified wavelet.plot() to produce a better looking plot and put the wavelet code into a new function called morlet().
+* Deprecated cwt.filled.contour
+* Added normalize1 to NAMESPACE
+* Added arguiment label.cex to pass to axis to increase the size of the labels on the plot in corr.rwl.seg() and modified 
+  the help file accordingly. This change was requested by a user and seems like a good idea.
+* Corrected some spelling in help for corr.rwl.seg(), ccf.series.seg(), and corr.series.seg(). I'm sure there is more.
+2010-07-17 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.6
+* Modified rcs() to stop() if any of the pith offsets are <1 or not integers. The help file indicated that this should
+  be so but it's now explicit in the code.
+* Fixed a bug in corr.rwl.seg() where floating series were not being drawn properly - the plot had them displaying all the way to the 
+  max yr range b/c of an inexing problem. Also made some cosmetic changes to the guides in between segments for the graph. I do NOT
+  like the way the plot on this function is done with the odd bin and even bin looping. Very clunky and confusing to look at. The
+  correlation part is fine and the graph is nice but the logic of the plot is silly.
+* Clarified language the help page for corr.rwl.seg().
+* Fixed a bug in corr.series.seg() where short series coupled with long segment lengths caused the function to crash. I added to the fix Mikko made 
+  in 1.3.3 by requiring that the minimum series length must be twice the segment length. Otherwise the function is useless. Error message now
+  indicates this as does the help file. Made some graphical improvements with bin lines extending past the actual bins to better match the 
+  moving correlation line.
+* Clarified language the help page for corr.series.seg().
+* Fixed a bug in ccf.series.rwl() where panels were out of order on series with long time spans. This involved reordering the
+  ccf.df$bin factor to be the same order as bins[,1].
+* Clarified language the help page for ccf.series.rwl().
+* Improved series.rwl.plot() to give more diagnostic information in four plots.
+* Improved the help page for series.rwl.plot() to beter explain what it now does.
+
+2010-07-05 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.5
+* Modified the help file for write.crn() so that the elev in the hdr will be written in a way that might
+  be more robust in terms of the ITRDB standard. But, it's very clunky and silly to depend on an unrelaible
+  standard. I also added some text to the help file for write.tucson() to indicate that the header should be thought
+  of as experimental. Thank goodness Mikko is working on getting tridas implemented.
+* Fixed a bug in rcs() where the rc was calculated wrong if none. The function implicitly assumed 
+  that at least one of the pith offsets would be 1. When all the pith offsets were >1 the function would crash
+   b/c of bad indexing.
+2010-05-13 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.4
+* fixed a bug in detrend() where args nyrs and f were not being passed to detrend.series().
+* Corrected at typo in Zang's name. (So sorry Christian!)
+2010-04-22 Andy  Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.3 made by Mikko Korpela
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: NAMESPACE
+---------------
+Added rwi.stats.running to exports.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: bai.in.R
+--------------
+Removed one for-loop by transforming it to vector operations.
+Also some other optimizations (move some operations outside the
+remaining for-loop, streamline the writing of the results).
+
+NOTE: Why is (was) there a NaN check in calc.area? I removed it as
+pointless. Also note that NaN is different from NA (in my opinion, NA
+check would also be pointless).
+
+As calc.area became quite simple after my edits, I moved the remaining
+code to the main function.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: bai.in.Rd
+---------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: bai.out.R
+---------------
+Similar optimizations as to bai.in.R. One particular optimization was
+to replace max(cumsum(dat2)) with sum(dat2), which gives the same
+result (but faster) when there are no negative values, as in ring
+width series.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: bai.out.Rd
+----------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: chron.R
+-------------
+Now uses rowMeans (rowSums), which is faster than computing the means
+(sums) with apply.
+
+Now uses ar.func defined in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: chron.Rd
+--------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: cms.R
+-----------
+Changed the sequence notation i:i to just i.
+Removed the pointless variable err3.
+Removed the err1 and err2 arrays, using scalar variables instead (only
+need one value at a time).
+The computation of err2 is now more efficient, and err2 is of opposite
+sign than before (taken into account when the value is utilized).
+Compute err6 with vector operations instead of using a for loop.
+Use fewer multiplications in the computation of err6 by using the
+common factor, sqrt(med).
+Removed pointless call to the function c in c.curve <- c(index[,2]).
+Avoid searching for NA values multiple times, save the results of the
+search in the variable no.na.
+Edited the if/else structure in the end. Now it makes fewer tests than
+before.
+Removed yr.range and sortByIndex, now uses those defined in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: cms.Rd
+------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: corr.series.seg.R
+-----------------------
+
+Now produces a more useful error message if the data set is so small
+that no segments fit over the data. Example based on the example in
+the .Rd file:
+
+>        data(co021)
+>        dat=co021
+>        #create a missing ring by deleting a year of growth in a random series
+>        flagged=dat$'641143'
+>        flagged=c(NA,flagged[-325])
+>        names(flagged)=rownames(dat)
+>        dat$'641143'=NULL
+> dat=dat[(nrow(dat)-48):nrow(dat),]                    # clip
+> flagged=flagged[(length(flagged)-48):length(flagged)] # clip
+> seg.24=corr.series.seg(rwl=dat,series=flagged,seg.length=24,biweight=FALSE)
+
+produces this message in dplR 1.3.1 (.2 also, I think):
+
+Error in seq.default(from = min.bin, to = max(series.yrs) - seg.length,  : 
+  wrong sign in 'by' argument
+
+but after a change to the code of the function:
+
+Error in corr.series.seg(rwl = dat, series = flagged, seg.length = 24,  : 
+  Cannot fit any segments (not enough years in the series)
+
+I also made a mostly cosmetic change (got rid of bins1 and bins2), and
+made the following functional change:
+
+Previously:
+else min.bin = min(series.yrs)%/%bin.floor*bin.floor+bin.floor
+
+Now:
+else min.bin = ceiling(min(series.yrs)/bin.floor)*bin.floor
+
+The example below shows how the new code line produces a less wasteful
+result (min.bin1 below) than the previous one (min.bin2),
+which jumps to the next level "one year too early", and consequently
+misses a segment that would have been possible to include.
+
+> min.year<-1900:2000
+> min.bin1 <- ceiling(min.year/25)*25
+> min.bin1
+  [1] 1900 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925
+ [16] 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1950 1950 1950 1950
+ [31] 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950
+ [46] 1950 1950 1950 1950 1950 1950 1975 1975 1975 1975 1975 1975 1975 1975 1975
+ [61] 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975
+ [76] 1975 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000
+ [91] 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000
+> min.bin2 <- min.year%/%25*25+25
+> min.bin2
+  [1] 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925
+ [16] 1925 1925 1925 1925 1925 1925 1925 1925 1925 1925 1950 1950 1950 1950 1950
+ [31] 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950 1950
+ [46] 1950 1950 1950 1950 1950 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975
+ [61] 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975 1975
+ [76] 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000
+ [91] 2000 2000 2000 2000 2000 2000 2000 2000 2000 2000 2025
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: corr.series.seg.Rd
+------------------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: helpers.R (new)
+---------------
+A couple of helper functions to work around a design stupidity of R:
+http://radfordneal.wordpress.com/2008/08/06/design-flaws-in-r-1-reversing-sequences/
+
+Also moved ar.func here. The function was previously defined in three
+different places, and always functionally the same. I also optimized
+the function a tiny bit. So, if any changes to the function are made
+in the future, they will show up in every "client" function without
+having to edit three+ different files.
+
+Moved yr.range here. It is a slightly optimized version of the
+function used in cms, rcs, rwl.stats, seg.plot, and spag.plot. There's
+still a local definition for yr.range in corr.rwl.seg, because the
+function there is a bit different.
+
+Moved sortByIndex here. It is a slightly optimized version of the
+function used in cms and rcs.
+
+Is this a good place for the helper functions? If you have a better
+suggestion, feel free to move the functions or rename the file.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: ffcsaps.R
+---------------
+Fixed the helper function spdiags. The previous version crashed
+ffcsaps in the marginal case where it was given a data set with just
+three points. The bug was kind of related to the design stupidity just
+mentioned above. Now the helper function is documented, and uses the
+function "inc" defined in helpers.R. The use of the inc function
+avoids the problematic case where the sequence
+max(1,1-d.k):min(n,n-d.k), which denotes row numbers in the sparse
+matrix, might include zero. The "inc" function ensures that we get an
+increasing (or empty) sequence (does not include zeros when we start
+above zero), as probably was originally intended.
+
+I also made the code a bit clearer by renaming variables.
+
+I wonder what the kludgy part at the end of ffcsaps actually does?
+Whose code is that? Could it be rewritten in a non-kludgy way and/or
+with some more comments? What purpose does the variable x2 serve, and
+why does it contain a fixed-interval sequence with a seemingly
+arbitrary length of 101?
+
+The kludgy part sometimes prints a warning.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: glk.R
+-----------
+Small patch. Avoids a crash in the unlikely scenario that the function
+is called with an x consisting of just one record. After the fix, the
+function returns (expectedly, but not too usefully) NA. Also removed
+the unused internal function strip.na(x).
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: glk.Rd
+------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: normalize.xdate.R
+-----------------------
+Changes comparable to normalize1.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: normalize1.R
+------------------
+Now uses colMeans instead of apply in one statement, and colSums
+instead of apply in another statement.
+
+Uses ar.func defined in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: plot.series.rwl.R
+-----------------------
+Save temporary results for reuse.
+One line / statement removed (the result was not used).
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: rcs.R
+-----------
+Use rowMeans.
+Removed yr.range and sortByIndex, now uses those defined in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: rcs.Rd
+------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: read.tucson.R
+-------------------
+Fixed a bug concerning the width of the decade field in the case
+long=FALSE. The correct choice is 4, and 8+4 makes 12, which is
+consistent with 7+5=12 in the case long=TRUE, and the Tucson format
+description (column 13 is already ring width data). The bug would have
+caused trouble in the presence of 6 digit ring widths.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: rwi.stats.R
+-----------------
+Fixed a typo (seies -> series), another typo (Correaltions ->
+Correlations). Reorganized the code a bit.
+
+Maybe this should be fixed to use number of trees instead of number of
+cores in the EPS calculation. Also, I think it's dangerous to divide a
+sum of correlations by the theoretical number of terms in the sum,
+because sum of the terms may end up being NA. Then the average of
+non-NA elements, computed by dividing with the theoretical number of
+terms, will be too small.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: rwi.stats.Rd
+------------------
+Added my name to it. Changed the "see also" (unintentional?)
+self-reference into a reference to rwi.stats.running. Should the
+reference have been to rwl.stats?
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: rwi.stats.running.R
+-------------------------
+Compute stats in a running window. New function. Computes the EPS a
+bit differently compared to rwi.stats (see comments to rwi.stats.R
+above).
+
+Quite slow. Optimizations or (partial?) rewrite in C would be
+welcome. Maybe some day.
+
+The terminology used in the function arguments and the documentation
+may need to be made consistent with other parts of dplR. I'm not the
+best expert on that topic.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: rwi.stats.running.Rd
+--------------------------
+Documentation for the new function. Based on a copy-paste from rwi.stats.Rd.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: rwl.stats.R
+-----------------
+Removed yr.range, now uses the version defined in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: seg.plot.R
+----------------
+Removed yr.range, now uses the version defined in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: skel.plot.R
+-----------------
+Save temporary results for reuse.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: skel.plot.Rd
+------------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: spag.plot.R
+-----------------
+Save temporary results for reuse.
+Removed yr.range, now uses the version defined in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: spag.plot.Rd
+------------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: wavelet.plot.R
+--------------------
+Use multiplication instead of exponentiation in the computation of the
+power spectrum. This reduces computation time.
+Fixed the messy indentation of the source code.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: wavelet.plot.Rd
+---------------------
+Added my name to it.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: write.crn.R
+-----------------
+Fixed two bugs: one affected lines with only one year, the other
+affected the last line in case it was already complete (10 years).
+
+Example of the effect of the first bug (last line in file):
+xxxstd1990 540 12NANA 540 129990  09990  09990  09990  09990  09990  09990  09990  09990  0
+
+After fix:
+xxxstd1990 540 129990  09990  09990  09990  09990  09990  09990  09990  09990  0
+
+Example of the effect of the second bug (last line in file):
+xxxstd1990 540 12 554 12 499 12 262 12 502 12 435 12 472 12 513 12 538 11 679 119990  09990  0
+
+After fix:
+xxxstd1990 540 12 554 12 499 12 262 12 502 12 435 12 472 12 513 12 538 11 679 11
+
+
+The fixes involved changing
+
+for(j in 2:n.yrs)
+to
+for(j in inc(2,n.yrs))
+
+and
+
+for(k in 1:yrs.left)
+to
+for(k in inc(1,yrs.left))
+
+where inc(from,to) is a function in helpers.R.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: write.tucson.R
+--------------------
+Added a new function parameter. Setting long.names=TRUE allows series
+IDs with 7 or 8 characters depending on whether there are long year
+numbers in the data.
+
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File: write.tucson.Rd
+---------------------
+Describe the new parameter.
+
+(Also) files not named here
+---------------------------
+Added argument names to every call of the seq function. Quote from ?seq:
+     The interpretation of the unnamed arguments of 'seq' and 'seq.int'
+     is _not_ standard, and it is recommended always to name the
+     arguments when programming.
+I didn't take credit just for these small changes (no changes to .Rd
+files).
+
+2010-04-12  Andy Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.2
+* typos in Rd files fixed
+* bugs fixed in write.tucson() and write.compact() where upper case IDs would cause the functions fail
+
+2010-03-26  Andy Bunn <andy.bunn@wwu.edu>
+* CHANGES IN dplR VERSION 1.3.1
+* ChangeLog introduced. I am going to compile a full changelog from the src files of all the previous dplR versions from 1.0 forward. I've been remiss in not keeping one!
+* glk - New function. Gleichlaeufigkeit by Zang is a classical agreement test
+* sea - New function. Superposed epoch analysis by Zang
+* combine.rwl - updated by Zang. Now takes lists as input.
