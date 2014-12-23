@@ -593,14 +593,14 @@ test.glk <- function() {
                 msg="glk() is 1 when two sequences agree about the signs of all the differences and there are no zero differences")
     checkEquals(0, glk(data.frame(seq.rand, -seq.rand))[1, 2],
                 msg="glk() is 0 when two sequences disagree about the signs of all the differences and there are no zero differences")
-    checkEquals(0, glk(data.frame(seq.step, -seq.step))[1, 2],
-                msg="glk() is 0 when two sequences agree about the location of zero differences and disagree about the signs of nonzero differences")
+    checkEquals(0.5, glk(data.frame(seq.step, -seq.step))[1, 2],
+                msg="dplR >= 1.6.1: a zero difference in both series is full agreement (here, exactly half of the cases)")
     checkEquals(0.5, glk(data.frame(seq.rand, rep(1, length(seq.rand))))[1, 2],
                 msg="glk() is 0.5 when one sequence is constant and the other only has nonzero differences")
-    checkEquals(0.5, glk(data.frame(seq.step, seq.step))[1, 2],
-                msg="glk() is 0.5 when comparing a sequence where exactly half of the differences are zero with itself")
-    checkEquals(0.25, glk(data.frame(seq.step, rep(1, length(seq.step))))[1, 2],
-                msg="glk() is 0.25 when comparing a constant sequence and a sequence where exactly half of the differences are zero")
+    checkEquals(1, glk(data.frame(seq.step, seq.step))[1, 2],
+                msg="dplR >= 1.6.1: glk() is 1 when comparing any sequence with itself")
+    checkEquals(0.75, glk(data.frame(seq.step, rep(1, length(seq.step))))[1, 2],
+                msg="dplR >= 1.6.1: glk() is 0.75 when comparing a constant sequence and a sequence where exactly half of the differences are zero")
 }
 
 test.hanning <- function() {
@@ -727,34 +727,4 @@ test.tbrm <- function() {
                 msg="Robust mean of an odd length sequence of consecutive integers is the mean of the sequence, even with C==0")
     checkTrue(is.nan(tbrm(seq.even, C=0)),
               msg="Robust mean of an even length sequence of consecutive integers is NaN when using a small C")
-}
-
-test.uuid.gen <- function() {
-    ## Setup
-    SAMP.SIZE <- 100
-    ugen <- uuid.gen()
-    uuids <- character(SAMP.SIZE)
-    for(i in seq_len(SAMP.SIZE))
-        uuids[i] <- ugen()
-    uuids.split <- strsplit(uuids, split="-", fixed=TRUE)
-    unique.nchar <- unique(t(sapply(uuids.split, nchar)))
-    unique.chars <-
-        unique(strsplit(paste(sapply(uuids.split, paste, collapse=""),
-                              collapse=""), split=character(0))[[1]])
-    all.4 <- unique(substr(uuids, 15, 15))
-    one.of.four <- unique(substr(uuids, 20, 20))
-    ## Test
-    checkEquals(SAMP.SIZE, length(unique(uuids)), msg="Unique IDs are unique")
-    checkTrue(all(nchar(uuids) == 36), msg="IDs have correct length")
-    checkTrue(all(sapply(uuids.split, length) == 5),
-              msg="IDs have 5 parts separated by dashes")
-    checkTrue(nrow(unique.nchar) == 1 &&
-              all(as.vector(unique.nchar) == c(8, 4, 4, 4, 12)),
-              msg="The parts have lengths 8, 4, 4, 4, and 12")
-    checkTrue(all(unique.chars %in% c(as.character(0:9), letters[seq_len(6)])),
-              msg="In addition to dashes, IDs only contain hexadecimal digits")
-    checkEquals("4", all.4,
-                msg="IDs have a constant character \"4\" in one position")
-    checkTrue(all(one.of.four %in% c("8", "9", "a", "b")),
-              msg="IDs have a restricted character (4/16 choices) in one position")
 }

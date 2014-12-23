@@ -22,6 +22,8 @@ importFrom(lattice, panel.abline, panel.dotplot, panel.segments,
 
 importFrom(png, readPNG)
 
+importFrom(stringi, stri_trans_nfc, stri_trans_nfd)
+
 importFrom(stringr, str_pad, str_trim)
 
 importFrom(utils, head, installed.packages, read.fwf, tail,
@@ -42,7 +44,7 @@ export(autoread.ids, bai.in, bai.out, ccf.series.rwl, chron, cms,
        write.compact, write.crn, write.rwl, write.tridas,
        write.tucson, plot.rwl, interseries.cor, summary.rwl,
        plot.crn, insert.ring, delete.ring, xskel.ccf.plot, xskel.plot,
-       latexify, latexDate)
+       latexify, latexDate, rasterPlot)
 
 S3method(print, redfit)
 S3method(plot, rwl)
