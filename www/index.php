@@ -43,7 +43,7 @@ echo $contents; } ?>
 
 <!-- end of project description -->
 
-<p> See the <a href="http://www.wwu.edu/huxley/treering/dplR.shtml">intro page</a> at <a href="http://www.wwu.edu/huxley/treering/index.shtml">Huxley Tree Ring Laboratory</a> / <a href="http://www.wwu.edu/">Western Washington University</a>. </p>
+<p> See the <a href="http://huxley.wwu.edu/trl/htrl-dplr">intro page</a> at <a href="http://huxley.wwu.edu/huxley-tree-ring-laboratory">Huxley Tree Ring Laboratory</a> / <a href="http://www.wwu.edu/">Western Washington University</a>. </p>
 
 <p> The <strong>project summary page</strong> you can find <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/"><strong>here</strong></a>. </p>
 
